@@ -1,0 +1,11 @@
+<odoo>
+  <record id="action_donvithugom_model_js" model="ir.actions.client">
+    <field name="name">trang đơn vi thu gom</field>
+    <field name="tag">don_vi_thu_gom.donvithugom_template</field>
+  </record>
+
+  <menuitem id="menu_donvithugom_root" name="Đơn vụ thu gom JS Menu" sequence="10"/>
+  <menuitem id="menu_donvithugom_model_js" name="ádasdasdasd Models Menu 2"
+            parent="menu_donvithugom_root"
+            action="action_donvithugom_model_js" sequence="20"/>
+</odoo>
