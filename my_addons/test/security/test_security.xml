@@ -1,0 +1,21 @@
+<odoo>
+    <record id="group_test_read" model="res.groups">
+        <field name="name">Test Read Only</field>
+    </record>
+
+    <record id="group_test_create" model="res.groups">
+        <field name="name">Test Create Only</field>
+    </record>
+
+    <record id="group_test_write" model="res.groups">
+        <field name="name">Test Write Only</field>
+    </record>
+
+    <record id="group_test_delete" model="res.groups">
+        <field name="name">Test Delete Only</field>
+    </record>
+
+    <record id="group_test_manager" model="res.groups">
+        <field name="name">Test Manager</field>
+    </record>
+</odoo>

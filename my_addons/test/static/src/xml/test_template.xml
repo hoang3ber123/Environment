@@ -1,0 +1,66 @@
+<templates xml:space="preserve">
+  <t t-name="test.TestModelTemplate">
+    <div class="oe_structure container my-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="card-title mb-4 text-primary">📋 Danh sách test Records</h2>
+
+          <!-- Form nhập -->
+          <div class="d-flex gap-2 flex-wrap mb-3">
+            <input t-model="state.newName"
+                   type="text"
+                   class="form-control flex-grow-1"
+                   placeholder="Nhập tên mới"/>
+            <input t-model="state.newTitle"
+                    type="text"
+                    class="form-control flex-grow-1"
+                    placeholder="Nhập mô tả"/>
+            <button class="btn btn-primary" t-on-click="addTest">➕ Thêm</button>
+          </div>
+
+          <!-- Danh sách items -->
+          <t t-if="state.items.length">
+            <ul class="list-group mb-3">
+                <t t-foreach="state.items" t-as="item" t-key="item.id">
+                  <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                    <!-- Left side: Checkbox + Info -->
+                    <div class="form-check d-flex flex-column">
+                      <div class="d-flex align-items-center">
+                        <input class="form-check-input me-2"
+                              type="checkbox"
+                              t-on-click="() => this.toggleSelection(item.id)"
+                              t-att-checked="state.selectedIds.has(item.id)"/>
+                        <label class="form-check-label fw-semibold mb-0">
+                          <t t-esc="item.name"/>
+                        </label>
+                      </div>
+                      <small class="text-muted ms-4">
+                        <t t-esc="item.title"/>
+                      </small>
+                    </div>
+                    <!-- Right side: Action buttons -->
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-sm btn-outline-info"
+                              t-on-click="() => this.viewDetail(item.id)">👁 Xem</button>
+                      <button class="btn btn-sm btn-outline-secondary"
+                              t-on-click="() => this.editTest(item)">✏️ Sửa</button>
+                    </div>
+                  </li>
+                </t>
+            </ul>
+
+            <button class="btn btn-danger"
+                    t-on-click="() => this.deleteSelected()"
+                    t-att-disabled="state.selectedIds.size === 0">🗑 Xóa đã chọn</button>
+          </t>
+
+          <!-- Nếu không có bản ghi -->
+          <t t-if="!state.items.length">
+            <p class="text-muted">Không có bản ghi nào.</p>
+          </t>
+        </div>
+      </div>
+    </div>
+  </t>
+</templates>
+

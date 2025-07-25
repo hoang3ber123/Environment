@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:13
+    container_name: odoo18-db
+    environment:
+      POSTGRES_DB: odoo
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  odoo:
+    image: odoo:18
+    container_name: odoo18
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    volumes:
+      - ./my_addons:/mnt/extra-addons
+      - ./config/odoo.conf:/etc/odoo/odoo.conf    # ✅ chính xác file cấu hình
+    environment:
+      - HOST=db
+    command: ["odoo", "-c", "/etc/odoo/odoo.conf", "-i", "base"]
+    restart: unless-stopped
+
+volumes:
+  db-data:

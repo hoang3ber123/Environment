@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_test_admin,test admin full,model_test_model,base.group_system,1,1,1,1
+access_test_read,test read only,model_test_model,test.group_test_read,1,0,0,0
+access_test_create,test create only,model_test_model,test.group_test_create,1,0,1,0
+access_test_write,123 write only,model_test_model,test.group_test_write,1,1,0,0
+access_test_delete,háddasdas delete only,model_test_model,test.group_test_delete,1,0,0,1
+access_test_manager,ádasdasd manager,model_test_model,test.group_test_manager,1,1,1,1
