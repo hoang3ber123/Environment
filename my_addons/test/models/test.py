@@ -6,7 +6,4 @@ class Test(models.Model):
 
     name = fields.Char(string="Name")
     title = fields.Char(string="Title")
-<<<<<<< HEAD
-=======
     image = fields.Binary(string="Image", attachment=True)
->>>>>>> a7a2e8c (feature: save state)
