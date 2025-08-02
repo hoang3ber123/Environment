@@ -1,0 +1,11 @@
+<odoo>
+  <record id="action_test_model_js" model="ir.actions.client">
+    <field name="name">test (JS) titlessssss</field>
+    <field name="tag">test_relationship.test_relationship_template</field>
+  </record>
+
+  <menuitem id="menu_test_root" name="Test JS Menu" sequence="10"/>
+  <menuitem id="menu_test_model_js" name="Test Models Menu 2"
+            parent="menu_test_root"
+            action="action_test_model_js" sequence="20"/>
+</odoo>

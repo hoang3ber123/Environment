@@ -1,15 +1,13 @@
 from odoo import http
 from odoo.http import request
 
-class TestController(http.Controller):
+class TestRelationshipController(http.Controller):
 
-    @http.route('/test/list', type='json', auth='user')
-    def test_list(self, name=None, title=None, page=1, page_size=10):
+    @http.route('/test_relationship/list', type='json', auth='user')
+    def test_relationship_list(self, name=None, page=1, page_size=10):
         domain = []
         if name:
             domain.append(('name', 'ilike', name))
-        if title:
-            domain.append(('title', 'ilike', title))
 
         # Tính offset và limit
         try:
@@ -19,9 +17,9 @@ class TestController(http.Controller):
             page, page_size = 1, 10
 
         offset = (page - 1) * page_size
-        total_count = request.env['test.model'].search_count(domain)
+        total_count = request.env['test_relationship.model'].search_count(domain)
         
-        records = request.env['test.model'].search(domain, offset=offset, limit=page_size)
+        records = request.env['test_relationship.model'].search(domain, offset=offset, limit=page_size)
 
         return {
             "total": total_count,
@@ -31,48 +29,33 @@ class TestController(http.Controller):
                 {
                     'id': r.id,
                     'name': r.name,
-                    'title': r.title,
-                    'image': r.image,
                 }
                 for r in records
             ]
         }
 
-    @http.route('/test/create', type='json', auth='user')
-    def test_create(self, **kwargs):
+    @http.route('/test_relationship/create', type='json', auth='user')
+    def test_relationship_create(self, **kwargs):
         name = kwargs.get('name')
-        title = kwargs.get('title')
-        image = kwargs.get('image')
         # nếu bắt buộc có name
         if not name:
             return {'error': 'Missing name'}
-        # Nếu bắt buộc có title
-        if not title:
-            return {'error': 'Missing title'}
         
         # Bỏ name và title lấy được vào values: values này dùng để tạo đối tượng
         values = {
             'name': name,
-            'title': title,
         }
-
-        # cách này dành cho những trường không bắt buộc phải có khi tạo
-        if image:
-            values['image'] = image
-
 
         # record này là đối tượng lấy từ hàm create bên dưới
         # hàm create(values): create nhận values đã tạo bên trên để tạo đối tượng phù hợp với model
         # env['test.model']: cái này là để biết thực hiện create trên model nào
         # test.model chính là cái _name bình đặt ở bên models/test.py
-        record = request.env['test.model'].create(values)
+        record = request.env['test_relationship.model'].create(values)
         
         # Trả về đối tượng vừa được tạo
         return {
             'id': record.id,
             'name': record.name,
-            'title': record.title,
-            'image': record.image,
         }
     
     @http.route('/test/delete_bulk', type='json', auth='user', csrf=False)
