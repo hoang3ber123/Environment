@@ -5,15 +5,10 @@
     'data': [
             'security/test_security.xml',
             'security/ir.model.access.csv',
-            'views/test_menu.xml',
+            'views/test_views.xml',
+            'views/category_views.xml',
+            'views/tag_views.xml',
         ],
-    'assets': {
-        'web.assets_backend': [
-            "test/static/src/css/style.css",
-            'test/static/src/js/test_template.js',
-            'test/static/src/xml/test_template.xml',
-        ],
-    },
     'installable': True,
     'application': True,
 }

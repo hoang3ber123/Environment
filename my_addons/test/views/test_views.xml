@@ -1,0 +1,62 @@
+<odoo>
+  <!-- Form thêm, sửa -->
+  <record id="view_test_form" model="ir.ui.view">
+    <field name="name">env.test.form</field>
+    <field name="model">env.test</field>
+    <field name="arch" type="xml">
+      <form>
+        <sheet>
+          <group>
+            <!-- Field bình thường -->
+            <field name="name"/>
+            <field name="title"/>
+            <field name="age"/>
+            <field name="score"/>
+            <field name="is_active"/>
+            <field name="birthday"/>
+            <field name="checkin"/>
+            <field name="status"/>
+            <field name="notes"/>
+            <field name="currency_id"/>
+            <field name="amount"/>
+            <!-- Field hình ảnh -->
+            <field name="image" widget="image" class="oe_avatar" options="{'size': [32, 32]}"/>
+
+            <!-- Quan hệ many to many -->
+            <field name="category_ids" widget="many2many_tags" options="{'no_create': True}"/>
+            
+            <!-- người tạo -->
+            <field name="created_by" readonly="1"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- hiển thị danh sách -->
+  <record id="view_test_kanban" model="ir.ui.view">
+    <field name="name">env.test.kanban</field>
+    <field name="model">env.test</field>
+    <field name="arch" type="xml">
+      <kanban>
+        <templates>
+          <t t-name="kanban-box">
+            <div class="oe_kanban_global_click">
+              <img t-att-src="kanban_image('env.test', 'image', record.id.value)" width="64" height="64"/>
+              <span><field name="name"/></span>
+            </div>
+          </t>
+        </templates>
+      </kanban>
+    </field>
+  </record>
+
+  <record id="action_test" model="ir.actions.act_window">
+    <field name="name">Tests</field>
+    <field name="res_model">env.test</field>
+    <field name="view_mode">kanban,list,form</field>
+  </record>
+
+  <menuitem id="menu_test_root" name="Tests"/>
+  <menuitem id="menu_test" name="Tests" parent="menu_test_root" action="action_test"/>
+</odoo>
