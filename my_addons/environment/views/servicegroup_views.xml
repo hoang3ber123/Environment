@@ -1,0 +1,41 @@
+<odoo>
+    <!-- Form thêm, sửa -->
+    <record id="view_servicegroup_form" model="ir.ui.view">
+        <field name="name">env.servicegroup.form</field>
+        <field name="model">env.servicegroup</field>
+        <field name="arch" type="xml">
+        <form>
+            <sheet>
+            <group>
+                <!-- Field bình thường -->
+                <field name="name"/>
+                <field name="description"/>
+                <field name="status"/>
+            </group>
+            </sheet>
+        </form>
+        </field>
+    </record>
+
+    <!-- List view -->
+    <record id="view_servicegroup_list" model="ir.ui.view">
+    <field name="name">env.servicegroup.list</field>
+    <field name="model">env.servicegroup</field>
+    <field name="arch" type="xml">
+        <list>
+        <field name="name"/>
+        <field name="code"/>
+        <field name="status"/>
+        </list>
+    </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_servicegroup" model="ir.actions.act_window">
+    <field name="name">Service groups</field>
+    <field name="res_model">env.servicegroup</field>
+    <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_servicegroup" name="Service groups management" parent="menu_service_root" action="action_servicegroup"/>
+</odoo>
