@@ -1,18 +1,19 @@
 from odoo import models, fields, api
-class ServiceGroup(models.Model):
-    _name = 'env.servicegroup'
-    _description = 'ServiceGroup'
+class Service(models.Model):
+    _name = 'env.service'
+    _description = 'Service'
     _inherit = 'env.base'
 
     name = fields.Char(required=True, String="Name")
     code = fields.Char(required=True, String="Code")
     description = fields.Char(required=False, String="Description")
+    scope = fields.Char(required=False, String="Scope")
     status = fields.Selection(
         selection=[('draft', 'Draft'), ('active', 'Active'), ('stopping', 'Stopping')],
         string="Status",
         default='draft'
     )
-    service_ids = fields.One2many('env.service', 'groupservice_id', string='Services')
+    groupservice_id = fields.Many2one('env.servicegroup', string='Group Service')
 
     @api.model
     def create(self, vals):
