@@ -1,0 +1,6 @@
+<odoo>
+    <menuitem id="menu_service_root" name="Quản lý dịch vụ" />
+    <menuitem id="menu_location_root" name="Quản lý khu vực"/>
+    <menuitem id="menu_customer_root" name="Quản lý khách hàng"/>
+    <menuitem id="menu_unit_root" name="Quản lý đơn vị hành chính"/>
+</odoo>
