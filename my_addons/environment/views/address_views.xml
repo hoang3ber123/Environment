@@ -1,0 +1,42 @@
+<odoo>
+    <record id="view_address_form" model="ir.ui.view">
+        <field name="name">env.address.form</field>
+        <field name="model">env.address</field>
+        <field name="arch" type="xml">
+            <form string="Address">
+                <sheet>
+                    <group string="Thông tin địa chỉ">
+                        <field name="type"/>
+                        <field name="house_number"/>
+                        <field name="street"/>
+                        <field name="location_id" options="{'no_create': True}"/>
+                        <field name="full_path" readonly="1"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_address_list" model="ir.ui.view">
+        <field name="name">env.address.list</field>
+        <field name="model">env.address</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="type"/>
+                <field name="house_number"/>
+                <field name="street"/>
+                <field name="location_id"/>
+                <field name="full_path"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_address" model="ir.actions.act_window">
+        <field name="name">Addresses</field>
+        <field name="res_model">env.address</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_address" name="Address Management" parent="menu_location_root" action="action_address"/>
+</odoo>

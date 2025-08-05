@@ -4,10 +4,10 @@ class Service(models.Model):
     _description = 'Service'
     _inherit = 'env.base'
 
-    name = fields.Char(required=True, String="Name")
-    code = fields.Char(required=True, String="Code")
-    description = fields.Char(required=False, String="Description")
-    scope = fields.Char(required=False, String="Scope")
+    name = fields.Char(required=True, string="Name")
+    code = fields.Char(required=True, string="Code")
+    description = fields.Char(required=False, string="Description")
+    scope = fields.Char(required=False, string="Scope")
     status = fields.Selection(
         selection=[('draft', 'Draft'), ('active', 'Active'), ('stopping', 'Stopping')],
         string="Status",
