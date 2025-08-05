@@ -4,9 +4,9 @@ class ServiceGroup(models.Model):
     _description = 'ServiceGroup'
     _inherit = 'env.base'
 
-    name = fields.Char(required=True, String="Name")
-    code = fields.Char(required=True, String="Code")
-    description = fields.Char(required=False, String="Description")
+    name = fields.Char(required=True, string="Name")
+    code = fields.Char(required=True, string="Code")
+    description = fields.Char(required=False, string="Description")
     status = fields.Selection(
         selection=[('draft', 'Draft'), ('active', 'Active'), ('stopping', 'Stopping')],
         string="Status",
