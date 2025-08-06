@@ -1,0 +1,51 @@
+<odoo>
+    <!-- Form view -->
+    <record id="view_servicepricecomponent_form" model="ir.ui.view">
+        <field name="name">env.servicepricecomponent.form</field>
+        <field name="model">env.servicepricecomponent</field>
+        <field name="arch" type="xml">
+            <form string="Thành phần giá dịch vụ">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="service_price_id"/>
+                        <field name="component_name"/>
+                        <field name="amount"/>
+                        <field name="unit"/>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List view -->
+    <record id="view_servicepricecomponent_list" model="ir.ui.view">
+        <field name="name">env.servicepricecomponent.list</field>
+        <field name="model">env.servicepricecomponent</field>
+        <field name="arch" type="xml">
+            <list string="Danh sách thành phần giá">
+                <field name="name"/>
+                <field name="component_name"/>
+                <field name="amount"/>
+                <field name="unit"/>
+                <field name="service_price_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action view -->
+    <record id="action_servicepricecomponent" model="ir.actions.act_window">
+        <field name="name">Thành phần giá</field>
+        <field name="res_model">env.servicepricecomponent</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Quản lý các thành phần giá trong bảng giá dịch vụ</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_servicepricecomponent"
+              name="Thành phần giá"
+              parent="menu_service_root"
+              action="action_servicepricecomponent"/>
+</odoo>

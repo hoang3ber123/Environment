@@ -1,0 +1,55 @@
+<odoo>
+    <!-- Form view -->
+    <record id="view_customerwastegroup_form" model="ir.ui.view">
+        <field name="name">env.customerwastegroup.form</field>
+        <field name="model">env.customerwastegroup</field>
+        <field name="arch" type="xml">
+            <form string="Customer Waste Group">
+                <sheet>
+                    <group string="Thông tin nhóm">
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="customer_type"/>
+                        <field name="pricing_method"/>
+                        <field name="status"/>
+                    </group>
+                    <group string="Ngưỡng rác (kg)">
+                        <field name="waste_volume_min"/>
+                        <field name="waste_volume_max"/>
+                    </group>
+                    <group string="Ghi chú">
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List view -->
+    <record id="view_customerwastegroup_list" model="ir.ui.view">
+        <field name="name">env.customerwastegroup.list</field>
+        <field name="model">env.customerwastegroup</field>
+        <field name="arch" type="xml">
+            <list string="Customer Waste Groups">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="customer_type"/>
+                <field name="pricing_method"/>
+                <field name="status"/>
+                <field name="waste_volume_min"/>
+                <field name="waste_volume_max"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_customerwastegroup" model="ir.actions.act_window">
+        <field name="name">Customer Waste Groups</field>
+        <field name="res_model">env.customerwastegroup</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_customerwastegroup_list"/>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_customerwastegroup" name="Customer Groups Management" parent="menu_customer_root" action="action_customerwastegroup"/>
+</odoo>
