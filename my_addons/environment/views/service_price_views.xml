@@ -1,0 +1,52 @@
+<odoo>
+    <!-- Form View -->
+    <record id="view_serviceprice_form" model="ir.ui.view">
+        <field name="name">env.serviceprice.form</field>
+        <field name="model">env.serviceprice</field>
+        <field name="arch" type="xml">
+            <form string="Service Price">
+                <sheet>
+                    <group string="Thông tin bảng giá">
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="service_id"/>
+                        <field name="customerwastegroup_id"/>
+                        <field name="status"/>
+                    </group>
+                    <group string="Thời gian áp dụng">
+                        <field name="effective_from"/>
+                        <field name="effective_to"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- list View -->
+    <record id="view_serviceprice_list" model="ir.ui.view">
+        <field name="name">env.serviceprice.list</field>
+        <field name="model">env.serviceprice</field>
+        <field name="arch" type="xml">
+            <list string="Service Prices">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="service_id"/>
+                <field name="customerwastegroup_id"/>
+                <field name="effective_from"/>
+                <field name="effective_to"/>
+                <field name="status"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action-->
+    <record id="action_serviceprice" model="ir.actions.act_window">
+        <field name="name">Service Prices</field>
+        <field name="res_model">env.serviceprice</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_serviceprice_list"/>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_serviceprice" name="Service Price Management" parent="menu_service_root" action="action_serviceprice"/>
+</odoo>
