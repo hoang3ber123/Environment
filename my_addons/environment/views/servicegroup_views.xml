@@ -32,10 +32,13 @@
 
     <!-- Action -->
     <record id="action_servicegroup" model="ir.actions.act_window">
-    <field name="name">Service groups</field>
-    <field name="res_model">env.servicegroup</field>
-    <field name="view_mode">list,form</field>
+        <field name="name">Nhóm dịch vụ</field>
+        <field name="res_model">env.servicegroup</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Quản lý nhóm dịch vụ</p>
+        </field>
     </record>
 
-    <menuitem id="menu_servicegroup" name="Service groups management" parent="menu_service_root" action="action_servicegroup"/>
+    <menuitem id="menu_servicegroup" name="Nhóm dịch vụ" parent="menu_service_root" action="action_servicegroup"/>
 </odoo>

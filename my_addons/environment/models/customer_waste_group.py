@@ -21,9 +21,9 @@ class CustomerWasteGroup(models.Model):
     description = fields.Text(string="Description", help="Ghi chú/mô tả thêm (nếu có)")
     status = fields.Selection(
         selection=[
-            ('draft', 'Draft'),
-            ('active', 'Active'),
-            ('stopping', 'Stopping'),
+            ('draft', 'Nháp'),
+            ('active', 'Đang hoạt động'),
+            ('stopping', 'Ngừng hoạt động'),
         ],
         string="Status",
         required=True,

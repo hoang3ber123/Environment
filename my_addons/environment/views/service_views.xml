@@ -35,10 +35,13 @@
 
     <!-- Action -->
     <record id="action_service" model="ir.actions.act_window">
-    <field name="name">Service</field>
-    <field name="res_model">env.service</field>
-    <field name="view_mode">list,form</field>
+        <field name="name">Dịch vụ</field>
+        <field name="res_model">env.service</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Quản lý bảng dịch vụ</p>
+        </field>
     </record>
 
-    <menuitem id="menu_service" name="Service management" parent="menu_service_root" action="action_service"/>
+    <menuitem id="menu_service" name="Dịch vụ" parent="menu_service_root" action="action_service"/>
 </odoo>

@@ -6,41 +6,57 @@ class ServicePrice(models.Model):
     _description = 'Service Price'
     _inherit = 'env.base'
 
-    name = fields.Char(required=True, string="Name", help="Tên bảng giá dịch vụ (VD: Bảng giá Hộ gia đình, Nhóm 1...)")
-    code = fields.Char(required=True, string="Code", copy=False, help="Mã tự sinh từ tên bảng giá")
-    
-    service_id = fields.Many2one(
-        'env.service',
-        string="Service",
+    name = fields.Char(
         required=True,
-        help="Dịch vụ áp dụng"
+        string="Tên bảng giá",
+        help="Tên bảng giá dịch vụ (VD: Bảng giá Hộ gia đình, Nhóm 1...)"
     )
-    
-    customerwastegroup_id = fields.Many2one(
-        'env.customerwastegroup',
-        string="Customer Waste Group",
+    code = fields.Char(
         required=True,
-        help="Nhóm khách hàng áp dụng"
+        string="Mã bảng giá",
+        copy=False,
+        index=True,
+        help="Mã tự sinh từ tên bảng giá, là duy nhất trong hệ thống."
     )
 
-    effective_from = fields.Date(required=True, string="Effective From", help="Ngày bắt đầu áp dụng")
-    effective_to = fields.Date(string="Effective To", help="Ngày kết thúc hiệu lực (có thể để trống nếu không giới hạn)")
-    
+    service_id = fields.Many2one(
+        'env.service',
+        string="Dịch vụ",
+        required=True,
+        help="Dịch vụ mà bảng giá này áp dụng."
+    )
+
+    customerwastegroup_id = fields.Many2one(
+        'env.customerwastegroup',
+        string="Nhóm khách hàng",
+        required=True,
+        help="Nhóm khách hàng mà bảng giá này áp dụng."
+    )
+
+    effective_from = fields.Date(
+        required=True,
+        string="Hiệu lực từ ngày",
+        help="Ngày bắt đầu áp dụng bảng giá."
+    )
+    effective_to = fields.Date(
+        string="Hiệu lực đến ngày",
+        help="Ngày kết thúc áp dụng bảng giá (có thể để trống nếu không giới hạn)."
+    )
+
     status = fields.Selection(
         selection=[
-            ('draft', 'Draft'),
-            ('active', 'Active'),
-            ('stopping', 'Stopping'),
+            ('draft', 'Nháp'),
+            ('active', 'Đang áp dụng'),
+            ('stopping', 'Ngừng áp dụng'),
         ],
-        string="Status",
+        string="Trạng thái",
         required=True,
         default='draft',
-        help="Trạng thái bảng giá"
+        help="Trạng thái của bảng giá."
     )
 
     _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Code phải là duy nhất.'),
-        ('name_uniq', 'unique(name)', 'Name phải là duy nhất.')
+        ('code_uniq', 'unique(code)', 'Mã bảng giá phải là duy nhất.')
     ]
 
     @api.constrains('effective_from', 'effective_to')

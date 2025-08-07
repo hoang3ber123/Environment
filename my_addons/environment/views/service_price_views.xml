@@ -41,12 +41,14 @@
 
     <!-- Action-->
     <record id="action_serviceprice" model="ir.actions.act_window">
-        <field name="name">Service Prices</field>
+        <field name="name">Giá dịch vụ</field>
         <field name="res_model">env.serviceprice</field>
         <field name="view_mode">list,form</field>
-        <field name="view_id" ref="view_serviceprice_list"/>
+        <field name="help" type="html">
+            <p>Quản lý các giá trong bảng dịch vụ</p>
+        </field>
     </record>
 
     <!-- Menu -->
-    <menuitem id="menu_serviceprice" name="Service Price Management" parent="menu_service_root" action="action_serviceprice"/>
+    <menuitem id="menu_serviceprice" name="Giá dịch vụ" parent="menu_service_root" action="action_serviceprice"/>
 </odoo>
