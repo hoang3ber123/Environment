@@ -2,29 +2,50 @@ from odoo import models, fields, api
 
 class Location(models.Model):
     _name = 'env.location'
-    _description = 'Location'
+    _description = 'Địa giới hành chính'
     _inherit = 'env.base'
-    
-    name = fields.Char(required=True, string="Name", readonly=True)
-    
-    type = fields.Selection(
-        selection=[
-            ('province', 'Tỉnh / Thành phố'), 
-            ('district', 'Quận / Huyện'), 
-            ('ward', 'Phường / Xã'),
-        ],
-        string="Type",
-        default='province',
-        required=True
+
+    name = fields.Char(
+        required=True,
+        string="Tên địa phương",
+        readonly=True,
+        help="Tên địa phương (VD: Phường 1, Quận 5, TP. Hồ Chí Minh). Được nhập từ dữ liệu chuẩn, không cho sửa."
     )
 
-    code = fields.Char(required=True, string="Code", readonly=True)
-    
-    # full_path sẽ được import/gán cứng từ đầu
-    full_path = fields.Char(required=True, string="Full Path", readonly=True)
+    type = fields.Selection(
+        selection=[
+            ('province', 'Tỉnh / Thành phố'),
+            ('district', 'Quận / Huyện'),
+            ('ward', 'Phường / Xã'),
+        ],
+        string="Cấp hành chính",
+        default='province',
+        required=True,
+        help="Chọn cấp hành chính tương ứng (Tỉnh, Huyện, Xã)."
+    )
 
-    parent_id = fields.Many2one('env.location', string='Parent Location', readonly=True)
+    code = fields.Char(
+        required=True,
+        string="Mã địa phương",
+        readonly=True,
+        help="Mã định danh của địa phương theo hệ thống. Được nhập từ dữ liệu chuẩn, không cho sửa."
+    )
 
+    full_path = fields.Char(
+        required=True,
+        string="Đường dẫn đầy đủ",
+        readonly=True,
+        help="Tên đầy đủ của địa phương theo thứ tự hành chính (VD: TP. Hồ Chí Minh > Quận 5 > Phường 1)."
+    )
+
+    parent_id = fields.Many2one(
+        'env.location',
+        string='Địa phương cấp trên',
+        readonly=True,
+        help="Địa phương cha trong cấu trúc hành chính (VD: Quận trực thuộc Thành phố, Phường trực thuộc Quận...)."
+    )
+
+    # Hiển thị tên bằng full_path
     name_get = lambda self: [(rec.id, rec.full_path) for rec in self]
 
     @api.model
