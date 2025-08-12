@@ -28,6 +28,7 @@
             <field name="id"/>
             <field name="name"/>
             <field name="type"/>
+            <field name="code"/>
             <field name="full_path"/>
         </list>
     </field>

@@ -1,0 +1,30 @@
+<odoo>
+    <!-- Wizard view -->
+    <record id="view_customerimportwizard_form" model="ir.ui.view">
+        <field name="name">env.customer.import.wizard.form</field>
+        <field name="model">env.customerimportwizard</field>
+        <field name="arch" type="xml">
+            <form string="Import Customer from Excel" enctype="multipart/form-data">
+                <group>
+                    <field name="file" filename="filename"/>
+                    <field name="filename" readonly="1"/>
+                </group>
+                <footer>
+                    <button string="Import" type="object" name="action_import_file" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action mở wizard -->
+    <record id="action_customerimportwizard" model="ir.actions.act_window">
+        <field name="name">Thêm customer bằng excel</field>
+        <field name="res_model">env.customerimportwizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu con trong Khách hàng -->
+        <menuitem id="menu_customerimportwizard_import_excel" name="Thêm danh sách khách hàng" parent="menu_customer_root" action="action_customerimportwizard"/>
+</odoo>

@@ -7,3 +7,4 @@ from . import customer
 from . import customer_waste_group
 from . import service_price
 from . import service_price_component
+from . import customer_import_wizard

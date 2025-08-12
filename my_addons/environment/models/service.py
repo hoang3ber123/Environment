@@ -45,6 +45,34 @@ class Service(models.Model):
         ('code_uniq', 'unique(code)', 'Mã dịch vụ phải là duy nhất.')
     ]
 
+    def _generate_unique_code(self, base_code):
+        """Sinh code duy nhất dựa trên base_code, thêm số tăng dần nếu trùng"""
+        code = base_code
+        i = 1
+        while self.search_count([('code', '=', code)]) > 0:
+            code = f"{base_code}{i}"
+            i += 1
+        return code
+
+    @api.model
+    def create(self, vals):
+        if not vals.get('code'):
+            name = vals.get('name', '')
+            base_code = ''.join([word[0].upper() for word in name.split() if word])[:5]
+            vals['code'] = self._generate_unique_code(base_code)
+        else:
+            vals['code'] = self._generate_unique_code(vals['code'].upper())
+        return super().create(vals)
+
+    def write(self, vals):
+        if 'name' in vals and 'code' not in vals:
+            name = vals['name']
+            base_code = ''.join([word[0].upper() for word in name.split() if word])[:5]
+            vals['code'] = self._generate_unique_code(base_code)
+        elif 'code' in vals:
+            vals['code'] = self._generate_unique_code(vals['code'].upper())
+        return super().write(vals)
+
     @api.model
     def create(self, vals):
         if not vals.get('code'):
