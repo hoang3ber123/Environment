@@ -1,0 +1,11 @@
+name,code,customer_type,phone,email,cccd,waste_classification,house_type,house_number,street,location_id,description,collection_unit_id
+Nguyễn Văn An,KH123,CN,0912345678,an.nguyen@example.com,079123456789,TRUE,HOUSE_SINGLE,12A,Nguyễn Văn Cừ,Thành phố Hồ Chí Minh > Quận 1 > Phường Tân Định,Gần chợ Tân Định,MTX
+Nguyễn Thị Mai,KH130,CN,0934567890,mai.nguyen@example.com,079345678901,FALSE,APARTMENT,77,Lê Lợi,Thành phố Hồ Chí Minh > Quận 1 > Phường Tân Định,,MTX
+Công ty TNHH Minh Phát,KH124,TC,0283948123,contact@minhphat.com,079345678902,FALSE,SHOPHOUSE,45B,Trần Hưng Đạo,Thành phố Hồ Chí Minh > Quận 1 > Phường Đa Kao,,MTX
+Công ty TNHH DV Hoàng Gia,KH131,TC,02834561234,contact@hoanggia.vn,079345678903,TRUE,SHOPHOUSE,19,Nguyễn Bỉnh Khiêm,Thành phố Hồ Chí Minh > Quận 1 > Phường Đa Kao,Trụ sở chính,MTX
+Hộ gia đình Lê Thị Hoa,KH126,HGD,0938123456,contact1@hoanggia.vn,079987654321,TRUE,APARTMENT,101,Điện Biên Phủ,Thành phố Hồ Chí Minh > Quận 1 > Phường Bến Nghé,Gần công viên Lê Văn Tám,MTX
+Hộ ông Phạm Văn Cường,KH132,HGD,0912341111,contact2@hoanggia.vn,079112233445,TRUE,HOUSE_SINGLE,9,Nguyễn Huệ,Thành phố Hồ Chí Minh > Quận 1 > Phường Bến Nghé,Cạnh bến tàu,
+Nguyễn Văn Tùng,KH133,CN,0904567899,tung.nguyen@example.com,079556677889,FALSE,HOUSE_MULTI,5A,Hàm Nghi,Thành phố Hồ Chí Minh > Quận 1 > Phường Bến Thành,,VSD
+Nguyễn Văn B,KH127,CN,0901234567,vanb@example.com,079456789012,TRUE,HOUSE_MULTI,23,Nguyễn Thái Học,Thành phố Hồ Chí Minh > Quận 1 > Phường Bến Thành,,VSD
+Công ty ABC Logistics,KH128,TC,02839381234,info@abclogistics.vn,079556677872,FALSE,SHOPHOUSE,88,Calmette,Thành phố Hồ Chí Minh > Quận 1 > Phường Nguyễn Thái Bình,Kho bãi chính,
+Hộ ông Trần Văn Dũng,KH129,HGD,0909876543,contact3@hoanggia.vn,079123456888,TRUE,HOUSE_SINGLE,56A,Phạm Ngũ Lão,Thành phố Hồ Chí Minh > Quận 1 > Phường Phạm Ngũ Lão,Nhà góc hẻm,TTG1

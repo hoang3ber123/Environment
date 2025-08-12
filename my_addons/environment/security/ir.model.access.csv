@@ -4,6 +4,7 @@ access_env_service,env.service,model_env_service,,1,1,1,1
 access_env_location,env.location,model_env_location,,1,0,0,0
 access_env_collectionunit,env.collectionunit,model_env_collectionunit,,1,1,1,1
 access_env_customer,env.customer,model_env_customer,,1,1,1,1
+access_env_customerimportwizard,env.customerimportwizard,model_env_customerimportwizard,,1,1,1,1
 access_env_customerwastegroup,env.customerwastegroup,model_env_customerwastegroup,,1,1,1,1
 access_env_serviceprice,env.serviceprice,model_env_serviceprice,,1,1,1,1
 access_env_servicepricecomponent,env.servicepricecomponent,model_env_servicepricecomponent,,1,1,1,1
