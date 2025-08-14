@@ -3,4 +3,6 @@
     <menuitem id="menu_location_root" name="Quản lý khu vực"/>
     <menuitem id="menu_customer_root" name="Quản lý khách hàng"/>
     <menuitem id="menu_unit_root" name="Quản lý đơn vị hành chính"/>
+    <menuitem id="menu_contract_root" name="Quản lý hợp đồng"/>
+    <menuitem id="menu_statistic_root" name="Thống kê báo cáo"/>
 </odoo>

@@ -41,6 +41,13 @@ class Service(models.Model):
         help="Nhóm mà dịch vụ này thuộc về, giúp phân loại và tổ chức dịch vụ."
     )
 
+    collectionunit_rel_ids = fields.One2many(
+        'env.unitservice',
+        'service_id',
+        string='Collection Units'
+    )
+
+
     _sql_constraints = [
         ('code_uniq', 'unique(code)', 'Mã dịch vụ phải là duy nhất.')
     ]

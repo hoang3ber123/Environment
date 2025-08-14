@@ -8,3 +8,6 @@ access_env_customerimportwizard,env.customerimportwizard,model_env_customerimpor
 access_env_customerwastegroup,env.customerwastegroup,model_env_customerwastegroup,,1,1,1,1
 access_env_serviceprice,env.serviceprice,model_env_serviceprice,,1,1,1,1
 access_env_servicepricecomponent,env.servicepricecomponent,model_env_servicepricecomponent,,1,1,1,1
+access_env_unitservice,env.unitservice,model_env_unitservice,,1,1,1,1
+access_env_unitserviceprice,env.unitserviceprice,model_env_unitserviceprice,,1,1,1,1
+access_env_contract,env.contract,model_env_contract,,1,1,1,1

@@ -8,3 +8,7 @@ from . import customer_waste_group
 from . import service_price
 from . import service_price_component
 from . import customer_import_wizard
+from . import unit_service
+from . import unit_service_price
+from . import contract
+
