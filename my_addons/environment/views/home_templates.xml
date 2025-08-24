@@ -1,0 +1,60 @@
+<odoo>
+    <template id="home_template" name="Home Customer Search">
+        <t t-call="website.layout">
+            <div id="wrap" class="container mt-4">
+                <h2>Tra cứu thông tin khách hàng</h2>
+                <form action="/customers" method="get" class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" class="form-control" name="phone" placeholder="Nhập số điện thoại"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-control" name="email" placeholder="Nhập email"/>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">CCCD</label>
+                        <input type="text" class="form-control" name="cccd" placeholder="Nhập CCCD"/>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    </div>
+                </form>
+
+                <t t-if="customers">
+                    <h3 class="mt-5">Kết quả tìm kiếm</h3>
+                    <table class="table table-bordered mt-3">
+                        <thead>
+                            <tr>
+                                <th>Tên</th>
+                                <th>Điện thoại</th>
+                                <th>Email</th>
+                                <th>CCCD</th>
+                                <th>Loại KH</th>
+                                <th>Địa chỉ</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="customers" t-as="c">
+                                <tr>
+                                    <td><t t-esc="c.name"/></td>
+                                    <td><t t-esc="c.phone"/></td>
+                                    <td><t t-esc="c.email"/></td>
+                                    <td><t t-esc="c.cccd"/></td>
+                                    <td><t t-esc="c.customer_type"/></td>
+                                    <td><t t-esc="c.full_path"/></td>
+                                    <td>
+                                        <a t-attf-href="/contracts/{{ c.id }}" class="btn btn-sm btn-info">
+                                            Xem danh sách hợp đồng
+                                        </a>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>

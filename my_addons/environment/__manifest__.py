@@ -1,7 +1,7 @@
 {
     'name': 'Environment App',
     'version': '1.0',
-    'depends': ['base', 'web'],
+    'depends': ['base', 'web', 'website'],
     'data': [
             'security/environment_security.xml',
             'security/ir.model.access.csv',
@@ -20,6 +20,11 @@
             'views/unit_service_views.xml',
             'views/unit_service_price_views.xml',
             'views/contract_views.xml',
+            'views/contact_order_views.xml',
+            # Website
+            'views/home_templates.xml',
+            'views/contracts_templates.xml',
+            'views/payment_result_template.xml',
         ],
     'installable': True,
     'application': True,

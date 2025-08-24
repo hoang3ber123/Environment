@@ -1,5 +1,6 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from dateutil.relativedelta import relativedelta
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class Contract(models.Model):
     )
     estimated_waste_volume = fields.Float(string="Estimated Waste Volume")
     employee_id = fields.Many2one("res.users", string="Created By")
-    start_date = fields.Date(string="Start Date", required=True)
+    start_date = fields.Date(string="Start Date", required=True, default=fields.Date.today)
     end_date = fields.Date(string="End Date", required=True)
     status = fields.Selection([
         ('active', 'Active'),
@@ -31,13 +32,19 @@ class Contract(models.Model):
         ('expired', 'Expired')
     ], string="Status", default='active')
 
+    contract_term = fields.Selection([
+        ('6', '6 Tháng'),
+        ('12', '12 Tháng'),
+    ], string="Thời hạn (tháng)", required=True, default="12")
+
     monthly_amount = fields.Float(
         string="Monthly Amount",
         compute="_compute_monthly_amount",
         store=True,
         readonly=True
     )
-    total_amount = fields.Float(string="Total Amount", default=0.0, readonly=True)
+
+    orders = fields.One2many("env.contract.order", "contract_id", string="Orders")
 
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
@@ -46,7 +53,7 @@ class Contract(models.Model):
         else:
             self.collection_unit_id = False
         self.service_id = False  # reset service khi đổi customer
-
+    
     @api.onchange('collection_unit_id')
     def _onchange_collection_unit_id(self):
         domain = []
@@ -133,6 +140,18 @@ class Contract(models.Model):
             _logger.info("Final monthly_amount: %s", rec.monthly_amount)
             _logger.info("=== End compute monthly_amount ===")
 
+    def _calc_end_date(self, start_date, contract_term):
+        """Helper: tính ngày hết hạn"""
+        if not start_date or not contract_term:
+            return None
+        if isinstance(start_date, str):
+            start_date = fields.Date.from_string(start_date)
+        if contract_term == '6':
+            return start_date + relativedelta(months=6)
+        elif contract_term == '12':
+            return start_date + relativedelta(months=12)
+        return None
+    
     @api.model
     def create(self, vals):
         if 'customer_id' in vals and not vals.get('collection_unit_id'):
@@ -140,12 +159,23 @@ class Contract(models.Model):
             if customer.collection_unit_id:
                 vals['collection_unit_id'] = customer.collection_unit_id.id
 
+        if vals.get('start_date') and vals.get('contract_term'):
+            vals['end_date'] = self._calc_end_date(vals['start_date'], vals['contract_term'])
+
         record = super().create(vals)
         record._check_service_in_unit()
         record._check_waste_group_in_service_price()
         return record
 
     def write(self, vals):
+        for rec in self:
+            tmp = dict(vals)
+            if not tmp.get('start_date'):
+                tmp['start_date'] = rec.start_date
+            if not tmp.get('contract_term'):
+                tmp['contract_term'] = rec.contract_term
+            if tmp.get('start_date') and tmp.get('contract_term'):
+                vals['end_date'] = rec._calc_end_date(tmp['start_date'], tmp['contract_term'])
         res = super().write(vals)
         self._check_service_in_unit()
         self._check_waste_group_in_service_price()

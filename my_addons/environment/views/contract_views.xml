@@ -17,10 +17,8 @@
                         </group>
                         <group>
                             <field name="start_date"/>
-                            <field name="end_date"/>
+                            <field name="contract_term"/>
                             <field name="status"/>
-                            <field name="monthly_amount" readonly="1"/>
-                            <field name="total_amount" readonly="1"/>
                             <field name="employee_id" readonly="1"/>
                         </group>
                     </group>
@@ -41,10 +39,10 @@
                 <field name="service_id"/>
                 <field name="customer_waste_group_id"/>
                 <field name="status"/>
+                <field name="contract_term"/>
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="monthly_amount"/>
-                <field name="total_amount"/>
             </list>
         </field>
     </record>
@@ -57,6 +55,5 @@
     </record>
 
     <!-- Menu -->
-    <menuitem id="menu_contract_root" name="Contracts" sequence="10"/>
-    <menuitem id="menu_contract" name="Contracts" parent="menu_contract_root" action="action_contract"/>
+    <menuitem id="menu_contract" name="Hợp đồng" parent="menu_contract_root" action="action_contract"/>
 </odoo>
