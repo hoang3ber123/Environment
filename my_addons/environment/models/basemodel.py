@@ -3,7 +3,8 @@ from odoo import models, fields, api
 class BaseModel(models.AbstractModel):
     _name = 'env.base'
     _description = 'Base model with created_at, updated_at'
-
+    _abstract = True
+    
     created_at = fields.Datetime(string='Ngày tạo', readonly=True)
     updated_at = fields.Datetime(string='Ngày sửa', readonly=True)
     created_by = fields.Many2one('res.users', string='Người tạo', readonly=True)

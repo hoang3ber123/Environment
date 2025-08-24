@@ -1,2 +1,13 @@
 <odoo>
+    <!-- Manager Group -->
+    <record id="group_env_manager" model="res.groups">
+        <field name="name">Environment Manager</field>
+        <field name="category_id" ref="base.module_category_hidden"/> <!-- hoặc tạo category riêng -->
+    </record>
+
+    <!-- Employee Group -->
+    <record id="group_env_employee" model="res.groups">
+        <field name="name">Environment Employee</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
 </odoo>

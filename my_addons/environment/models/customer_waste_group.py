@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 class CustomerWasteGroup(models.Model):
     _name = 'env.customerwastegroup'
     _description = 'Customer Waste Group'

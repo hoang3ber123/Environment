@@ -28,8 +28,8 @@ class CollectionUnit(models.Model):
 
     location_ids = fields.Many2many(
         comodel_name='env.location',
-        relation='collectionunit_location_rel',
-        column1='collectionunit_id',
+        relation='collection_unit_location_rel',
+        column1='collection_unit_id',
         column2='location_id',
         string="Khu vực phụ trách",
         help="Danh sách các địa phương mà đơn vị này phụ trách thu gom."
@@ -58,6 +58,12 @@ class CollectionUnit(models.Model):
         help="Trạng thái của đơn vị thu gom."
     )
 
+    service_rel_ids = fields.One2many(
+        'env.unitservice',
+        'collection_unit_id',
+        string='Services'
+    )
+    
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'Tên đơn vị thu gom phải là duy nhất.'),
         ('code_uniq', 'unique(code)', 'Mã đơn vị thu gom phải là duy nhất.')

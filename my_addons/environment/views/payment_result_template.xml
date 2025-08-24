@@ -1,0 +1,18 @@
+<odoo>
+  <template id="payment_result_template" name="Payment Result">
+    <t t-call="website.layout">
+      <div class="container mt-5 text-center">
+        <t t-if="status == 'success'">
+          <h2 class="text-success">💳 Thanh toán thành công!</h2>
+          <p>Hợp đồng ID: <t t-esc="contract_id"/> - Đơn hàng ID: <t t-esc="order_id"/></p>
+        </t>
+        <t t-else="">
+          <h2 class="text-danger">❌ Thanh toán thất bại</h2>
+          <p>Vui lòng thử lại sau.</p>
+        </t>
+
+        <a href="/home" class="btn btn-primary mt-3">Về trang chủ</a>
+      </div>
+    </t>
+  </template>
+</odoo>

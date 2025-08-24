@@ -1,6 +1,15 @@
 <odoo>
-    <menuitem id="menu_service_root" name="Quản lý dịch vụ" />
-    <menuitem id="menu_location_root" name="Quản lý khu vực"/>
-    <menuitem id="menu_customer_root" name="Quản lý khách hàng"/>
-    <menuitem id="menu_unit_root" name="Quản lý đơn vị hành chính"/>
+    <!-- Root menu for Manager -->
+    <menuitem id="menu_manager_root" name="Manager" groups="environment.group_env_manager"/>
+    
+    <!-- Root menu for Employee -->
+    <menuitem id="menu_employee_root" name="Employee" groups="environment.group_env_employee"/>
+
+    <!-- Submenus under Manager -->
+    <menuitem id="menu_service_root" name="Quản lý dịch vụ" parent="menu_manager_root"/>
+    <menuitem id="menu_location_root" name="Quản lý khu vực" parent="menu_manager_root"/>
+    <menuitem id="menu_customer_root" name="Quản lý khách hàng" parent="menu_manager_root"/>
+    <menuitem id="menu_unit_root" name="Quản lý đơn vị hành chính" parent="menu_manager_root"/>
+    <menuitem id="menu_contract_root" name="Quản lý hợp đồng" parent="menu_manager_root"/>
+    <menuitem id="menu_statistic_root" name="Thống kê báo cáo" parent="menu_manager_root"/>
 </odoo>

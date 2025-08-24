@@ -1,0 +1,59 @@
+<odoo>
+    <!-- Form View -->
+    <record id="view_contract_form" model="ir.ui.view">
+        <field name="name">env.contract.form</field>
+        <field name="model">env.contract</field>
+        <field name="arch" type="xml">
+            <form string="Contract">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="contract_number"/>
+                            <field name="customer_id"/>
+                            <field name="collection_unit_id" readonly="1"/>
+                            <field name="service_id"/>
+                            <field name="customer_waste_group_id"/>
+                            <field name="estimated_waste_volume"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="contract_term"/>
+                            <field name="status"/>
+                            <field name="employee_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List View -->
+    <record id="view_contract_list" model="ir.ui.view">
+        <field name="name">env.contract.list</field>
+        <field name="model">env.contract</field>
+        <field name="arch" type="xml">
+            <list string="Contract">
+                <field name="contract_number"/>
+                <field name="customer_id"/>
+                <field name="collection_unit_id"/>
+                <field name="service_id"/>
+                <field name="customer_waste_group_id"/>
+                <field name="status"/>
+                <field name="contract_term"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="monthly_amount"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_contract" model="ir.actions.act_window">
+        <field name="name">Contracts</field>
+        <field name="res_model">env.contract</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_contract" name="Hợp đồng" parent="menu_contract_root" action="action_contract"/>
+</odoo>

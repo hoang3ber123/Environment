@@ -1,0 +1,53 @@
+<odoo>
+    <!-- Form thêm, sửa Unit Service Price -->
+    <record id="view_unitserviceprice_form" model="ir.ui.view">
+        <field name="name">env.unitserviceprice.form</field>
+        <field name="model">env.unitserviceprice</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="collection_unit_id" options="{'no_create': True}"/>
+                        <field name="service_price_id" options="{'no_create': True}"/>
+                        <field name="multiplier"/>
+                        <field name="effective_from"/>
+                        <field name="effective_to"/>
+                        <field name="status"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- List view -->
+    <record id="view_unitserviceprice_list" model="ir.ui.view">
+        <field name="name">env.unitserviceprice.list</field>
+        <field name="model">env.unitserviceprice</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="collection_unit_id"/>
+                <field name="service_price_id"/>
+                <field name="multiplier"/>
+                <field name="effective_from"/>
+                <field name="effective_to"/>
+                <field name="status"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_unitserviceprice" model="ir.actions.act_window">
+        <field name="name">Bảng giá đơn vị - dịch vụ</field>
+        <field name="res_model">env.unitserviceprice</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Quản lý bảng giá đơn vị - dịch vụ.</p>
+        </field>
+    </record>
+
+    <!-- Menuitem -->
+    <menuitem id="menu_unitserviceprice"
+              name="Bảng giá đơn vị - dịch vụ"
+              parent="menu_service_root"
+              action="action_unitserviceprice"/>
+</odoo>
