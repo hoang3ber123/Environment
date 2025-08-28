@@ -148,8 +148,8 @@ class Contract(models.Model):
             except ValueError:
                 term = 0
             total_value = rec.monthly_amount * term
-            paid_value = rec.orders_count * rec.monthly_amount
-            rec.remaining_debt = total_value - paid_value if total_value > paid_value else 0
+            paid_value = sum(order.total_amount for order in rec.orders)
+            rec.remaining_debt = total_value - paid_value
 
     # ========== ACTION TRÊN FIELD ===============
     @api.onchange('start_date', 'contract_term')
@@ -261,6 +261,21 @@ class Contract(models.Model):
             return start_date + relativedelta(months=12)
         return None
     
+    def _init_months(self):
+        """Tạo các bản ghi env.contract.month cho hợp đồng nếu chưa có"""
+        for rec in self:
+            if rec.months:
+                continue  # đã có thì bỏ qua
+            term_months = int(rec.contract_term)
+            start_month = rec.start_date.month
+            for i in range(1, term_months + 1):
+                month_num = (start_month + i - 1) % 12 or 12
+                self.env["env.contract.month"].create({
+                    "contract_id": rec.id,
+                    "name": str(month_num),
+                    "paid": False
+                })
+
     # ========== TẠO VÀ CẬP NHẬT DỮ LIỆU ===============
     @api.model_create_multi
     def create(self, vals_list):
@@ -286,79 +301,50 @@ class Contract(models.Model):
         records = super().create(vals_list)
 
         # Tạo các ContractMonth
-        for rec in records:
-            term_months = int(rec.contract_term)
-            start_month = rec.start_date.month
-            for i in range(1, term_months + 1):
-                month_num = (start_month + i - 1) % 12
-                if month_num == 0:
-                    month_num = 12
-                self.env['env.contract.month'].create({
-                    'contract_id': rec.id,
-                    'name': str(month_num),
-                    'paid': False
-                })
+        records._init_months()
 
         return records
 
     def write(self, vals):
+        blocked_fields = {
+            "customer_id", "collection_unit_id", "service_id",
+            "customer_waste_group_id", "contract_term",
+            "start_date", "end_date"
+        }
+
         for rec in self:
-            # Nếu đã có tháng thanh toán thì khóa toàn bộ việc chỉnh sửa
             if rec.months and any(m.paid for m in rec.months):
-                raise ValidationError(
-                    "Không thể chỉnh sửa hợp đồng vì đã có tháng được thanh toán."
-                )
+                # Nếu có tháng đã thanh toán → chặn update các field nhạy cảm
+                for field in blocked_fields:
+                    if field in vals:
+                        raise ValidationError(
+                            f"Không thể chỉnh sửa trường '{field}' vì hợp đồng đã có tháng được thanh toán."
+                        )
 
-            # Nếu chưa có start_date thì set mặc định
-            if 'start_date' not in vals and not rec.start_date:
-                vals['start_date'] = fields.Date.today()
+            # Set mặc định nếu chưa có start_date
+            if "start_date" not in vals and not rec.start_date:
+                vals["start_date"] = fields.Date.today()
 
-            # Nếu chưa có contract_term thì set mặc định
-            if 'contract_term' not in vals and not rec.contract_term:
-                vals['contract_term'] = '12'
+            # Set mặc định nếu chưa có contract_term
+            if "contract_term" not in vals and not rec.contract_term:
+                vals["contract_term"] = 12
 
-            # Cập nhật end_date khi có start_date hoặc contract_term thay đổi
-            start_date = vals.get('start_date', rec.start_date)
-            contract_term = vals.get('contract_term', rec.contract_term)
+            # Cập nhật end_date khi có thay đổi start_date hoặc contract_term
+            start_date = vals.get("start_date", rec.start_date)
+            contract_term = vals.get("contract_term", rec.contract_term)
             if start_date and contract_term:
-                vals['end_date'] = self._calc_end_date(start_date, contract_term)
+                vals["end_date"] = self._calc_end_date(start_date, contract_term)
 
-            # Nếu có customer_id thay đổi mà chưa có collection_unit_id thì tự gán
-            if 'customer_id' in vals and not vals.get('collection_unit_id'):
-                customer = self.env['env.customer'].browse(vals['customer_id'])
+            # Nếu đổi customer_id thì gán collection_unit_id tự động
+            if "customer_id" in vals and not vals.get("collection_unit_id"):
+                customer = self.env["env.customer"].browse(vals["customer_id"])
                 if customer.collection_unit_id:
-                    vals['collection_unit_id'] = customer.collection_unit_id.id
+                    vals["collection_unit_id"] = customer.collection_unit_id.id
 
-        # Gọi super để cập nhật dữ liệu
         res = super().write(vals)
 
-        # Sau khi update xong thì kiểm tra nếu record chưa có months → tạo mới
-        for rec in self:
-            if not rec.months:
-                term_months = int(rec.contract_term)
-                start_month = rec.start_date.month
-                for i in range(1, term_months + 1):
-                    month_num = (start_month + i - 1) % 12
-                    if month_num == 0:
-                        month_num = 12
-                    self.env['env.contract.month'].create({
-                        'contract_id': rec.id,
-                        'name': str(month_num),
-                        'paid': False
-                    })
+        # Nếu chưa có months thì khởi tạo
+        self._init_months()
 
         return res
 
-    # # ========== Front end action =============
-    # def action_open_payment_form(self):
-    #     self.ensure_one()
-    #     return {
-    #         'name': 'Thanh toán hợp đồng',
-    #         'type': 'ir.actions.act_window',
-    #         'res_model': 'env.contract.order',
-    #         'view_mode': 'form',
-    #         'target': 'new',  # mở popup
-    #         'context': {
-    #             'default_contract_id': self.id,
-    #         }
-    #     }

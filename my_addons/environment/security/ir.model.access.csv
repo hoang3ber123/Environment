@@ -4,7 +4,7 @@ access_env_service_manager,env.service manager,model_env_service,group_env_manag
 access_env_location_manager,env.location manager,model_env_location,group_env_manager,1,1,1,1
 access_env_collectionunit_manager,env.collectionunit manager,model_env_collectionunit,group_env_manager,1,1,1,1
 access_env_customer_manager,env.customer manager,model_env_customer,group_env_manager,1,1,1,1
-access_env_customerimportwizard_manager,env.customerimportwizard manager,model_env_customerimportwizard,group_env_manager,1,1,1,1
+access_env_customerimportwizard_manager,env.customerimportwizard manager,model_env_customerimportwizard,group_env_manager,1,0,1,0
 access_env_customerwastegroup_manager,env.customerwastegroup manager,model_env_customerwastegroup,group_env_manager,1,1,1,1
 access_env_serviceprice_manager,env.serviceprice manager,model_env_serviceprice,group_env_manager,1,1,1,1
 access_env_servicepricecomponent_manager,env.servicepricecomponent manager,model_env_servicepricecomponent,group_env_manager,1,1,1,1
