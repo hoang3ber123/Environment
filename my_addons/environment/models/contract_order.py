@@ -16,10 +16,10 @@ class ContractOrder(models.Model):
         required=True,
         ondelete="cascade"
     )
-    months_paid = fields.Integer(
-        string="Số tháng thanh toán",
-        required=True,
-        default=1
+    months_selected = fields.Many2many(
+        'env.contract.month',
+        string="Tháng thanh toán",
+        domain="[('contract_id','=',contract_id),('paid','=',False)]"
     )
     total_amount = fields.Float(
         string="Tổng tiền thanh toán",
@@ -28,36 +28,39 @@ class ContractOrder(models.Model):
         readonly=True
     )
 
-    # Quan hệ ngược từ Contract -> Orders
-    # (đặt bên Contract để dễ xem, bạn có thể thêm vào model Contract luôn)
-    # orders = fields.One2many("env.contract.order", "contract_id", string="Orders")
-
-    @api.depends("months_paid", "contract_id.monthly_amount")
+    @api.depends("months_selected", "contract_id.monthly_amount")
     def _compute_total_amount(self):
         for rec in self:
-            if rec.contract_id and rec.months_paid > 0:
-                rec.total_amount = rec.months_paid * rec.contract_id.monthly_amount
+            if rec.contract_id:
+                rec.total_amount = len(rec.months_selected) * rec.contract_id.monthly_amount
             else:
                 rec.total_amount = 0.0
 
-    @api.constrains("months_paid", "contract_id")
-    def _check_months_paid(self):
+    @api.constrains("months_selected", "contract_id")
+    def _check_months_selected(self):
         for rec in self:
-            if rec.months_paid <= 0:
-                raise ValidationError("Số tháng thanh toán phải lớn hơn 0.")
+            if not rec.months_selected:
+                raise ValidationError("Phải chọn ít nhất 1 tháng để thanh toán.")
 
-            if rec.contract_id:
-                # Tổng số tháng đã thanh toán cho contract này (chưa tính record hiện tại)
-                already_paid = sum(
-                    rec.contract_id.orders.filtered(lambda o: o.id != rec.id).mapped("months_paid")
-                )
-                try:
-                    contract_term = int(rec.contract_id.contract_term or 0)
-                except ValueError:
-                    contract_term = 0
+            # Kiểm tra xem các tháng đã chọn thuộc hợp đồng
+            for month in rec.months_selected:
+                if month.contract_id != rec.contract_id:
+                    raise ValidationError(f"Tháng {month.name} không thuộc hợp đồng này.")
 
-                if already_paid + rec.months_paid > contract_term:
-                    raise ValidationError(
-                        f"Tổng số tháng thanh toán ({already_paid + rec.months_paid}) vượt quá thời hạn hợp đồng {contract_term} tháng."
-                    )
-                
+    @api.model
+    def create(self, vals):
+        order = super().create(vals)
+        # Đánh dấu các tháng đã thanh toán
+        for month in order.months_selected:
+            month.paid = True
+            month.order_id = order.id
+        return order
+
+class ContractMonth(models.Model):
+    _name = 'env.contract.month'
+    _description = 'Contract Month'
+
+    name = fields.Char(string='Month')
+    contract_id = fields.Many2one('env.contract', string='Contract', ondelete='cascade')
+    paid = fields.Boolean(string='Paid', default=False)
+    order_id = fields.Many2one('env.contract.order', string='Related Order')

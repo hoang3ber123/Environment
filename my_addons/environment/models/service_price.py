@@ -33,6 +33,13 @@ class ServicePrice(models.Model):
         help="Nhóm khách hàng mà bảng giá này áp dụng."
     )
 
+    component_ids = fields.One2many(
+        'env.servicepricecomponent',
+        'service_price_id',
+        string="Thành phần giá",
+        help="Danh sách các thành phần chi tiết của bảng giá."
+    )
+
     effective_from = fields.Date(
         required=True,
         string="Hiệu lực từ ngày",
@@ -63,7 +70,13 @@ class ServicePrice(models.Model):
     def _check_effective_dates(self):
         for rec in self:
             if rec.effective_to and rec.effective_from > rec.effective_to:
-                raise ValidationError(_("Ngày bắt đầu không được sau ngày kết thúc."))
+                raise ValidationError("Ngày bắt đầu không được sau ngày kết thúc.")
+
+    @api.constrains('component_ids')
+    def _check_components(self):
+        for rec in self:
+            if not rec.component_ids:
+                raise ValidationError("Bảng giá phải có ít nhất một thành phần giá.")
 
     @api.model
     def create(self, vals):
@@ -80,3 +93,4 @@ class ServicePrice(models.Model):
                 code = ''.join([w[0].upper() for w in name.split() if w])[:5]
                 vals['code'] = code
         return super().write(vals)
+    

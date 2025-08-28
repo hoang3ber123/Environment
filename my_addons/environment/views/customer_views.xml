@@ -5,27 +5,84 @@
         <field name="arch" type="xml">
             <form string="Customer">
                 <sheet>
-                    <group string="Thông tin khách hàng">
-                        <field name="name"/>
-                        <field name="customer_type"/>
-                        <field name="house_type"/>
-                        <field name="waste_classification"/>
-                        <field name="phone"/>
-                        <field name="email"/>
-                        <field name="cccd"/>
-                    </group>
-                    <group string="Thông tin địa chỉ">
-                        <field name="house_number"/>
-                        <field name="street"/>
-                        <field name="location_id" options="{'no_create': True}"/>
-                        <field name="full_path" readonly="1"/>
-                        <field name="description"/>
-                    </group>
-                    <group string="Đơn vị thu gom quản lý">
-                        <field 
-                            name="collection_unit_id" 
-                            options="{'no_create': True}" />
-                    </group>
+                    <notebook>
+                        <!-- Tab Thông tin khách hàng -->
+                        <page string="Thông tin khách hàng">
+                            <group string="Thông tin cơ bản">
+                                <field name="name"/>
+                                <field name="customer_type"/>
+                                <field name="house_type"/>
+                                <field name="waste_classification"/>
+                                <field name="phone"/>
+                                <field name="email"/>
+                                <field name="cccd"/>
+                            </group>
+                            <group string="Thông tin địa chỉ">
+                                <field name="house_number"/>
+                                <field name="street"/>
+                                <field name="location_id" options="{'no_create': True}"/>
+                                <field name="full_path" readonly="1"/>
+                                <field name="description"/>
+                            </group>
+                            <group string="Đơn vị thu gom quản lý">
+                                <field name="collection_unit_id" options="{'no_create': True}"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab Hợp đồng -->
+                        <page string="Hợp đồng">
+                            <field name="contract_ids">
+                                <list string="Hợp đồng">
+                                    <field name="contract_number"/>
+                                    <field name="service_id"/>
+                                    <field name="status"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="monthly_amount"/>
+                                    <field name="remaining_debt"/>
+                                    <field name="months_paid_count"/>
+                                </list>
+                                <form string="Hợp đồng">
+                                    <sheet>
+                                        <notebook>
+                                            <!-- Tab Thông tin hợp đồng -->
+                                            <page string="Thông tin hợp đồng">
+                                                <group>
+                                                    <field name="contract_number"/>
+                                                    <field name="collection_unit_id" readonly="1"/>
+                                                    <field name="service_id"/>
+                                                    <field name="customer_waste_group_id"/>
+                                                    <field name="estimated_waste_volume"/>
+                                                    <field name="status"/>
+                                                    <field name="start_date"/>
+                                                    <field name="contract_term"/>
+                                                    <field name="end_date" readonly="1"/>
+                                                    <field name="monthly_amount"/>
+                                                </group>
+                                            </page>
+
+                                            <!-- Tab Hóa đơn -->
+                                            <page string="Hóa đơn thanh toán">
+                                                <field name="orders">
+                                                    <list>
+                                                        <field name="months_selected" widget="many2many_tags"/>
+                                                        <field name="total_amount" readonly="1"/>
+                                                        <field name="create_date"/>
+                                                    </list>
+                                                    <form>
+                                                        <group>
+                                                            <field name="months_selected" widget="many2many_tags"/>
+                                                            <field name="total_amount" readonly="1"/>
+                                                        </group>
+                                                    </form>
+                                                </field>
+                                            </page>
+                                        </notebook>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

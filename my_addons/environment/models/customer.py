@@ -112,6 +112,13 @@ class Customer(models.Model):
         ondelete='restrict',
         help="Đơn vị thu gom phụ trách khách hàng này."
     )
+    
+    contract_ids = fields.One2many(
+        'env.contract',
+        'customer_id',
+        string='Hợp đồng'
+    )
+
 
     # ==== Ràng buộc ====
     _sql_constraints = [

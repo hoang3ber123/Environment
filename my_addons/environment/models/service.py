@@ -47,6 +47,12 @@ class Service(models.Model):
         string='Collection Units'
     )
 
+    serviceprice_ids = fields.One2many(
+        'env.serviceprice',
+        'service_id',
+        string="Bảng giá",
+        help="Danh sách các bảng giá áp dụng cho dịch vụ này."
+    )
 
     _sql_constraints = [
         ('code_uniq', 'unique(code)', 'Mã dịch vụ phải là duy nhất.')

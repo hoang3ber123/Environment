@@ -11,10 +11,12 @@ access_env_servicepricecomponent_manager,env.servicepricecomponent manager,model
 access_env_unitservice_manager,env.unitservice manager,model_env_unitservice,group_env_manager,1,1,1,1
 access_env_unitserviceprice_manager,env.unitserviceprice manager,model_env_unitserviceprice,group_env_manager,1,1,1,1
 access_env_contract_manager,env.contract manager,model_env_contract,group_env_manager,1,1,1,1
-access_env_contractorder_manager,env.contract.order manager,model_env_contract_order,group_env_manager,1,0,1,1
+access_env_contractorder_manager,env.contract.order manager,model_env_contract_order,group_env_manager,1,0,1,0
+access_env_contractmonth_manager,env.contractmonth manager,model_env_contract_month,group_env_manager,1,1,1,0
 access_env_location_employee,env.location employee,model_env_location,group_env_employee,1,0,0,0
 access_env_contract_employee,env.contract employee,model_env_contract,group_env_employee,1,1,1,0
 access_env_customer_employee,env.customer employee,model_env_customer,group_env_employee,1,1,1,0
 access_env_customerwastegroup_employee,env.customerwastegroup employee,model_env_customerwastegroup,group_env_employee,1,0,0,0
 access_env_collectionunit_employee,env.collectionunit employee,model_env_collectionunit,group_env_employee,1,0,0,0
 access_env_contractorder_employee,env.contract.order employee,model_env_contract_order,group_env_employee,1,0,1,0
+access_env_contractmonth_employee,env.contractmonth employee,model_env_contract_month,group_env_employee,1,0,1,0

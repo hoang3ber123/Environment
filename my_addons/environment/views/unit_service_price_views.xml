@@ -37,17 +37,17 @@
 
     <!-- Action -->
     <record id="action_unitserviceprice" model="ir.actions.act_window">
-        <field name="name">Bảng giá đơn vị - dịch vụ</field>
+        <field name="name">Liên kết Đơn vị - Giá dịch vụ</field>
         <field name="res_model">env.unitserviceprice</field>
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
-            <p>Quản lý bảng giá đơn vị - dịch vụ.</p>
+            <p>Liên kết Đơn vị - Giá dịch vụ</p>
         </field>
     </record>
 
     <!-- Menuitem -->
     <menuitem id="menu_unitserviceprice"
-              name="Bảng giá đơn vị - dịch vụ"
+              name="Liên kết Đơn vị - Giá dịch vụ"
               parent="menu_service_root"
               action="action_unitserviceprice"/>
 </odoo>

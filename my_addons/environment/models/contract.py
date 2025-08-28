@@ -35,27 +35,144 @@ class Contract(models.Model):
     contract_term = fields.Selection([
         ('6', '6 Tháng'),
         ('12', '12 Tháng'),
-    ], string="Thời hạn (tháng)", required=True, default="12")
+    ], string="Thời hạn (tháng)", required=True, default='12')
 
+    months = fields.One2many('env.contract.month', 'contract_id', string='Contract Months')
+    orders = fields.One2many('env.contract.order', 'contract_id', string='Orders')
+
+    # compute field
     monthly_amount = fields.Float(
         string="Monthly Amount",
         compute="_compute_monthly_amount",
         store=True,
         readonly=True
     )
+    months_paid_count = fields.Integer(
+        string="Số tháng đã đóng",
+        compute="_compute_months_paid_count",
+        store=True
+    )
+    orders_count = fields.Integer(
+        string="Số hóa đơn",
+        compute="_compute_orders_count",
+        store=True
+    )
+    progress_percent = fields.Float(
+        string="Tiến độ (%)",
+        compute="_compute_progress",
+        store=True
+    )
+    remaining_debt = fields.Float(
+        compute="_compute_remaining_debt", 
+        string="Nợ còn lại", 
+        store=True
+    )
 
-    orders = fields.One2many("env.contract.order", "contract_id", string="Orders")
+    # ========== TÍNH TOÁN CHO CÁC FIELD COMPUTE ===============
+    # Tính toán tiền trong tháng phải trả
+    @api.depends(
+        "collection_unit_id",
+        "service_id",
+        "customer_waste_group_id",
+        "estimated_waste_volume",
+        "service_id.serviceprice_ids",
+        "service_id.serviceprice_ids.component_ids",
+        "collection_unit_id.unitserviceprice_ids.multiplier",
+    )
+    def _compute_monthly_amount(self):
+        for rec in self: 
+            if not (rec.collection_unit_id and rec.service_id and rec.customer_waste_group_id):
+                rec.monthly_amount = 0.0
+                continue
 
+            service_price = self.env['env.serviceprice'].search([
+                ('service_id', '=', rec.service_id.id),
+                ('customerwastegroup_id', '=', rec.customer_waste_group_id.id)
+            ], limit=1)
+            
+            if not service_price:
+                rec.monthly_amount = 0.0
+                continue
+
+            unit_service_price = self.env['env.unitserviceprice'].search([
+                ('collection_unit_id', '=', rec.collection_unit_id.id),
+                ('service_price_id', '=', service_price.id)
+            ], limit=1)
+ 
+            multiplier = unit_service_price.multiplier if unit_service_price else 1.0
+
+            components = self.env['env.servicepricecomponent'].search([
+                ('service_price_id', '=', service_price.id)
+            ])
+
+            total = 0.0
+            for comp in components:
+                if comp.unit == 'month':
+                    total += comp.amount * multiplier
+                elif comp.unit == 'kg':
+                    total += comp.amount * multiplier * rec.estimated_waste_volume
+
+            rec.monthly_amount = total
+
+    # Tính số lượng tháng đã trả
+    @api.depends("months.paid")
+    def _compute_months_paid_count(self):
+        for rec in self:
+            rec.months_paid_count = len(rec.months.filtered(lambda m: m.paid))
+
+    # Tính số lượng hóa đơn đã thanh toán
+    @api.depends("orders")
+    def _compute_orders_count(self):
+        for rec in self:
+            rec.orders_count = len(rec.orders)
+
+    # Tính tiến độ hoàn thành hợp đồng
+    @api.depends("contract_term", "months_paid_count")
+    def _compute_progress(self):
+        for rec in self:
+            if rec.contract_term:
+                try:
+                    term = int(rec.contract_term)
+                except ValueError:
+                    term = 0
+                rec.progress_percent = (rec.months_paid_count / term * 100) if term else 0
+            else:
+                rec.progress_percent = 0
+
+    # Tính toán công nợ còn lại
+    @api.depends("monthly_amount", "contract_term", "orders", "orders")
+    def _compute_remaining_debt(self):
+        for rec in self:
+            try:
+                term = int(rec.contract_term)
+            except ValueError:
+                term = 0
+            total_value = rec.monthly_amount * term
+            paid_value = rec.orders_count * rec.monthly_amount
+            rec.remaining_debt = total_value - paid_value if total_value > paid_value else 0
+
+    # ========== ACTION TRÊN FIELD ===============
+    @api.onchange('start_date', 'contract_term')
+    def _onchange_date_or_term(self):
+        if self.start_date and self.contract_term:
+            self.end_date = self._calc_end_date(self.start_date, self.contract_term)
+        else:
+            self.end_date = False
+
+    # Khi thay đổi customer_id thì chọn luôn collection unit
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
         if self.customer_id and self.customer_id.collection_unit_id:
             self.collection_unit_id = self.customer_id.collection_unit_id
         else:
             self.collection_unit_id = False
-        self.service_id = False  # reset service khi đổi customer
+        self.service_id = False
     
+    # Khi đổi collection_unit -> lọc lại service
     @api.onchange('collection_unit_id')
     def _onchange_collection_unit_id(self):
+        self.service_id = False
+        self.customer_waste_group_id = False
         domain = []
         if self.collection_unit_id:
             unit_services = self.env['env.unitservice'].search([
@@ -65,6 +182,32 @@ class Contract(models.Model):
             domain = [('id', 'in', service_ids)]
         return {'domain': {'service_id': domain}}
 
+    # Khi đổi service -> lọc lại customer_waste_group
+    @api.onchange('service_id')
+    def _onchange_service_id(self):
+        self.customer_waste_group_id = False
+        domain = []
+        if self.collection_unit_id and self.service_id:
+            # Tìm service_price hợp lệ
+            service_prices = self.env['env.serviceprice'].search([
+                ('service_id', '=', self.service_id.id),
+            ])
+            # Giữ lại waste_group mà có UnitServicePrice cho collection_unit hiện tại
+            valid_groups = []
+            for sp in service_prices:
+                unit_price = self.env['env.unitserviceprice'].search([
+                    ('collection_unit_id', '=', self.collection_unit_id.id),
+                    ('service_price_id', '=', sp.id)
+                ], limit=1)
+                if unit_price:
+                    valid_groups.append(sp.customerwastegroup_id.id)
+
+            domain = [('id', 'in', valid_groups)]
+        return {'domain': {'customer_waste_group_id': domain}}
+
+    # ========== VALIDATE & HELPER DỮ LIỆU ===============
+    # Check xem service có thuộc sở hữu của đơn vị thu gom không?
+    @api.onchange('collection_unit_id', 'service_id')
     def _check_service_in_unit(self):
         for rec in self:
             if rec.collection_unit_id and rec.service_id:
@@ -77,68 +220,34 @@ class Contract(models.Model):
                         f"Dịch vụ '{rec.service_id.name}' không thuộc đơn vị '{rec.collection_unit_id.name}'."
                     )
 
+    # Check xem thử là customer waste có liên kết với service thông qua price không?
+    @api.onchange('service_id', 'customer_waste_group_id', 'collection_unit_id')
     def _check_waste_group_in_service_price(self):
         for rec in self:
             if rec.service_id and rec.customer_waste_group_id:
+                # 1. Kiểm tra Service + Waste Group trong bảng giá dịch vụ
                 service_price = self.env['env.serviceprice'].search([
                     ('service_id', '=', rec.service_id.id),
                     ('customerwastegroup_id', '=', rec.customer_waste_group_id.id)
                 ], limit=1)
+
                 if not service_price:
                     raise ValidationError(
-                        f"Nhóm nguồn thải '{rec.customer_waste_group_id.name}' không hợp lệ cho dịch vụ '{rec.service_id.name}'."
+                        f"Nhóm nguồn thải '{rec.customer_waste_group_id.name}' "
+                        f"không có trong bảng giá cho dịch vụ '{rec.service_id.name}'."
                     )
 
-    @api.depends('collection_unit_id', 'service_id', 'customer_waste_group_id', 'estimated_waste_volume')
-    def _compute_monthly_amount(self):
-        for rec in self:
-            _logger.info("=== Start compute monthly_amount for Contract ID %s ===", rec.id)
-            _logger.info("Collection Unit: %s, Service: %s, Waste Group: %s, Estimated Volume: %s",
-            rec.collection_unit_id.id, rec.service_id.id, rec.customer_waste_group_id.id, rec.estimated_waste_volume)
-            
-            if not (rec.collection_unit_id and rec.service_id and rec.customer_waste_group_id):
-                _logger.warning("Missing required fields for calculation.")
-                rec.monthly_amount = 0.0
-                continue
+                # 2. Kiểm tra đơn vị thu gom có bảng giá này không
+                unit_service_price = self.env['env.unitserviceprice'].search([
+                    ('collection_unit_id', '=', rec.collection_unit_id.id),
+                    ('service_price_id', '=', service_price.id)
+                ], limit=1)
 
-            service_price = self.env['env.serviceprice'].search([
-                ('service_id', '=', rec.service_id.id),
-                ('customerwastegroup_id', '=', rec.customer_waste_group_id.id)
-            ], limit=1)
-            _logger.info("Service Price found: %s", service_price.id)
-            
-            if not service_price:
-                _logger.warning("No service_price found.")
-                rec.monthly_amount = 0.0
-                continue
-
-            unit_service_price = self.env['env.unitserviceprice'].search([
-                ('collection_unit_id', '=', rec.collection_unit_id.id),
-                ('service_price_id', '=', service_price.id)
-            ], limit=1)
-
-            _logger.info("Unit Service Price found: %s, Multiplier: %s",
-                     unit_service_price.id, unit_service_price.multiplier if unit_service_price else None)
-            
-            multiplier = unit_service_price.multiplier if unit_service_price else 1.0
-
-            components = self.env['env.servicepricecomponent'].search([
-                ('service_price_id', '=', service_price.id)
-            ])
-            _logger.info("Found %s components", len(components))
-
-            total = 0.0
-            for comp in components:
-                _logger.info("Component: %s, Amount: %s, Unit: %s",
-                         comp.id, comp.amount, comp.unit)
-                if comp.unit == 'month':
-                    total += comp.amount * multiplier
-                elif comp.unit == 'kg':
-                    total += comp.amount * multiplier * rec.estimated_waste_volume
-
-            rec.monthly_amount = total
-            _logger.info("Final monthly_amount: %s", rec.monthly_amount)
-            _logger.info("=== End compute monthly_amount ===")
+                if not unit_service_price:
+                    raise ValidationError(
+                        f"Đơn vị thu gom '{rec.collection_unit_id.name}' "
+                        f"không có bảng giá nào cho nhóm nguồn thải '{rec.customer_waste_group_id.name}'."
+                    )
 
     def _calc_end_date(self, start_date, contract_term):
         """Helper: tính ngày hết hạn"""
@@ -152,31 +261,104 @@ class Contract(models.Model):
             return start_date + relativedelta(months=12)
         return None
     
-    @api.model
-    def create(self, vals):
-        if 'customer_id' in vals and not vals.get('collection_unit_id'):
-            customer = self.env['env.customer'].browse(vals['customer_id'])
-            if customer.collection_unit_id:
-                vals['collection_unit_id'] = customer.collection_unit_id.id
+    # ========== TẠO VÀ CẬP NHẬT DỮ LIỆU ===============
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # Đảm bảo start_date
+            if 'start_date' not in vals or not vals['start_date']:
+                vals['start_date'] = fields.Date.today()
 
-        if vals.get('start_date') and vals.get('contract_term'):
+            # Đảm bảo contract_term
+            if 'contract_term' not in vals or not vals['contract_term']:
+                vals['contract_term'] = '12'
+
+            # Tính end_date trước khi tạo record
             vals['end_date'] = self._calc_end_date(vals['start_date'], vals['contract_term'])
 
-        record = super().create(vals)
-        record._check_service_in_unit()
-        record._check_waste_group_in_service_price()
-        return record
+            # Cập nhật collection_unit_id dựa trên customer_id
+            if 'customer_id' in vals and not vals.get('collection_unit_id'):
+                customer = self.env['env.customer'].browse(vals['customer_id'])
+                if customer.collection_unit_id:
+                    vals['collection_unit_id'] = customer.collection_unit_id.id
+
+        # Tạo records
+        records = super().create(vals_list)
+
+        # Tạo các ContractMonth
+        for rec in records:
+            term_months = int(rec.contract_term)
+            start_month = rec.start_date.month
+            for i in range(1, term_months + 1):
+                month_num = (start_month + i - 1) % 12
+                if month_num == 0:
+                    month_num = 12
+                self.env['env.contract.month'].create({
+                    'contract_id': rec.id,
+                    'name': str(month_num),
+                    'paid': False
+                })
+
+        return records
 
     def write(self, vals):
         for rec in self:
-            tmp = dict(vals)
-            if not tmp.get('start_date'):
-                tmp['start_date'] = rec.start_date
-            if not tmp.get('contract_term'):
-                tmp['contract_term'] = rec.contract_term
-            if tmp.get('start_date') and tmp.get('contract_term'):
-                vals['end_date'] = rec._calc_end_date(tmp['start_date'], tmp['contract_term'])
+            # Nếu đã có tháng thanh toán thì khóa toàn bộ việc chỉnh sửa
+            if rec.months and any(m.paid for m in rec.months):
+                raise ValidationError(
+                    "Không thể chỉnh sửa hợp đồng vì đã có tháng được thanh toán."
+                )
+
+            # Nếu chưa có start_date thì set mặc định
+            if 'start_date' not in vals and not rec.start_date:
+                vals['start_date'] = fields.Date.today()
+
+            # Nếu chưa có contract_term thì set mặc định
+            if 'contract_term' not in vals and not rec.contract_term:
+                vals['contract_term'] = '12'
+
+            # Cập nhật end_date khi có start_date hoặc contract_term thay đổi
+            start_date = vals.get('start_date', rec.start_date)
+            contract_term = vals.get('contract_term', rec.contract_term)
+            if start_date and contract_term:
+                vals['end_date'] = self._calc_end_date(start_date, contract_term)
+
+            # Nếu có customer_id thay đổi mà chưa có collection_unit_id thì tự gán
+            if 'customer_id' in vals and not vals.get('collection_unit_id'):
+                customer = self.env['env.customer'].browse(vals['customer_id'])
+                if customer.collection_unit_id:
+                    vals['collection_unit_id'] = customer.collection_unit_id.id
+
+        # Gọi super để cập nhật dữ liệu
         res = super().write(vals)
-        self._check_service_in_unit()
-        self._check_waste_group_in_service_price()
+
+        # Sau khi update xong thì kiểm tra nếu record chưa có months → tạo mới
+        for rec in self:
+            if not rec.months:
+                term_months = int(rec.contract_term)
+                start_month = rec.start_date.month
+                for i in range(1, term_months + 1):
+                    month_num = (start_month + i - 1) % 12
+                    if month_num == 0:
+                        month_num = 12
+                    self.env['env.contract.month'].create({
+                        'contract_id': rec.id,
+                        'name': str(month_num),
+                        'paid': False
+                    })
+
         return res
+
+    # # ========== Front end action =============
+    # def action_open_payment_form(self):
+    #     self.ensure_one()
+    #     return {
+    #         'name': 'Thanh toán hợp đồng',
+    #         'type': 'ir.actions.act_window',
+    #         'res_model': 'env.contract.order',
+    #         'view_mode': 'form',
+    #         'target': 'new',  # mở popup
+    #         'context': {
+    #             'default_contract_id': self.id,
+    #         }
+    #     }
