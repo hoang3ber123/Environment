@@ -6,14 +6,50 @@
         <field name="arch" type="xml">
         <form>
             <sheet>
-            <group>
-                <!-- Field bình thường -->
-                <field name="name"/>
-                <field name="description"/>
-                <field name="status"/>
-                <field name="scope"/>
-                <field name="groupservice_id" options="{'no_create': True}"/>
-            </group>
+                <group>
+                    <!-- Field bình thường -->
+                    <field name="name"/>
+                    <field name="description"/>
+                    <field name="status"/>
+                    <field name="scope"/>
+                    <field name="groupservice_id" options="{'no_create': True}"/>
+                </group>
+                <notebook position="inside">
+                    <page string="Bảng giá liên quan">
+                        <field name="serviceprice_ids">
+                            <list editable="bottom">
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="customerwastegroup_id"/>
+                                <field name="effective_from"/>
+                                <field name="effective_to"/>
+                                <field name="status"/>
+                            </list>
+                            <form>
+                                <sheet>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="code"/>
+                                        <field name="customerwastegroup_id"/>
+                                        <field name="effective_from"/>
+                                        <field name="effective_to"/>
+                                        <field name="status"/>
+                                    </group>
+                                    <group string="Thành phần giá">
+                                        <field name="component_ids">
+                                            <list editable="bottom">
+                                                <field name="name"/>
+                                                <field name="amount"/>
+                                                <field name="unit"/>
+                                                <field name="description"/>
+                                            </list>
+                                        </field>
+                                    </group>
+                                </sheet>
+                            </form>
+                        </field>
+                    </page>
+                </notebook>
             </sheet>
         </form>
         </field>

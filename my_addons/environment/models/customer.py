@@ -112,6 +112,16 @@ class Customer(models.Model):
         ondelete='restrict',
         help="Đơn vị thu gom phụ trách khách hàng này."
     )
+    
+    contract_ids = fields.One2many(
+        'env.contract',
+        'customer_id',
+        string='Hợp đồng'
+    )
+
+    # field thống kê
+    total_paid = fields.Float(string="Tổng đã trả", compute="_compute_finance_stats", store=True)
+    total_debt = fields.Float(string="Công nợ còn lại", compute="_compute_finance_stats", store=True)
 
     # ==== Ràng buộc ====
     _sql_constraints = [
@@ -121,6 +131,17 @@ class Customer(models.Model):
         ('cccd_uniq', 'unique(cccd)', 'CCCD đã tồn tại.'),
         ('code_uniq', 'unique(code)', 'Mã khách hàng phải là duy nhất.')
     ]
+
+    @api.depends("contract_ids.remaining_debt", "contract_ids.orders.total_amount")
+    def _compute_finance_stats(self):
+        for rec in self:
+            paid = 0
+            debt = 0
+            for contract in rec.contract_ids:
+                paid += sum(contract.orders.mapped("total_amount"))
+                debt += contract.remaining_debt
+            rec.total_paid = paid
+            rec.total_debt = debt
 
     @api.constrains('location_id')
     def _check_location_is_ward(self):

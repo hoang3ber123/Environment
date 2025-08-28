@@ -9,11 +9,10 @@
                     <group>
                         <group>
                             <field name="contract_id"/>
-                            <field name="months_paid"/>
+                            <field name="months_selected" widget="many2many_tags"/>
                         </group>
                         <group>
                             <field name="total_amount" readonly="1"/>
-                            <field name="create_uid" invisible="1"/>
                             <field name="create_date" invisible="1"/>
                         </group>
                     </group>
@@ -29,7 +28,7 @@
         <field name="arch" type="xml">
             <list string="Contract Orders">
                 <field name="contract_id"/>
-                <field name="months_paid"/>
+                <field name="months_selected"/>
                 <field name="total_amount"/>
                 <field name="create_date"/>
             </list>

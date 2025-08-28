@@ -61,7 +61,13 @@ class CollectionUnit(models.Model):
     service_rel_ids = fields.One2many(
         'env.unitservice',
         'collection_unit_id',
-        string='Services'
+        string='Dịch vụ liên kết với đơn vị'
+    )
+
+    unitserviceprice_ids = fields.One2many(
+        'env.unitserviceprice',
+        'collection_unit_id',
+        string='Bảng giá liên kết với đơn vị'
     )
     
     _sql_constraints = [

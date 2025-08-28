@@ -1,5 +1,5 @@
 <odoo>
-<!-- Form View -->
+    <!-- Form View -->
     <record id="view_collectionunit_form" model="ir.ui.view">
         <field name="name">env.collectionunit.form</field>
         <field name="model">env.collectionunit</field>
@@ -22,6 +22,48 @@
                     <group>
                         <field name="description"/>
                     </group>
+                    <notebook>
+                        <!-- Tab dịch vụ liên kết -->
+                        <page string="Dịch vụ liên kết">
+                            <field name="service_rel_ids">
+                                <list editable="bottom">
+                                    <field name="service_id"/>
+                                    <field name="status"/>
+                                </list>
+                                <form>
+                                    <sheet>
+                                        <group>
+                                            <field name="service_id"/>
+                                            <field name="status"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <!-- Tab bảng giá liên kết -->
+                        <page string="Bảng giá liên kết">
+                            <field name="unitserviceprice_ids">
+                                <list editable="bottom">
+                                    <field name="service_price_id"/>
+                                    <field name="multiplier"/>
+                                    <field name="effective_from"/>
+                                    <field name="effective_to"/>
+                                    <field name="status"/>
+                                </list>
+                                <form>
+                                    <sheet>
+                                        <group>
+                                            <field name="service_price_id"/>
+                                            <field name="multiplier"/>
+                                            <field name="effective_from"/>
+                                            <field name="effective_to"/>
+                                            <field name="status"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

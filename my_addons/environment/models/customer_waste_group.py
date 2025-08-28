@@ -31,7 +31,6 @@ class CustomerWasteGroup(models.Model):
         default='draft',
         help="Trạng thái nhóm dịch vụ"
     )
-    service_ids = fields.One2many('env.service', 'groupservice_id', string='Services')
 
     _sql_constraints = [
         ('code_uniq', 'unique(code)', 'Code phải là duy nhất.'),

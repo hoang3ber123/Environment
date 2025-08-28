@@ -6,17 +6,35 @@
         <field name="arch" type="xml">
             <form string="Service Price">
                 <sheet>
-                    <group string="Thông tin bảng giá">
-                        <field name="name"/>
-                        <field name="code"/>
-                        <field name="service_id"/>
-                        <field name="customerwastegroup_id"/>
-                        <field name="status"/>
-                    </group>
-                    <group string="Thời gian áp dụng">
-                        <field name="effective_from"/>
-                        <field name="effective_to"/>
-                    </group>
+                    <notebook>
+                        <!-- Tab 1: Thông tin chung -->
+                        <page string="Thông tin chung">
+                            <group string="Thông tin bảng giá">
+                                <field name="name"/>
+                                <field name="code"/>
+                                <field name="service_id"/>
+                                <field name="customerwastegroup_id"/>
+                                <field name="status"/>
+                            </group>
+                            <group string="Thời gian áp dụng">
+                                <field name="effective_from"/>
+                                <field name="effective_to"/>
+                            </group>
+                        </page>
+
+                        <!-- Tab 2: Thành phần giá -->
+                        <page string="Thành phần giá">
+                            <field name="component_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="component_name"/>
+                                    <field name="amount"/>
+                                    <field name="unit"/>
+                                    <field name="description"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

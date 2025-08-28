@@ -6,23 +6,51 @@
         <field name="arch" type="xml">
             <form string="Contract">
                 <sheet>
-                    <group>
-                        <group>
-                            <field name="contract_number"/>
-                            <field name="customer_id"/>
-                            <field name="collection_unit_id" readonly="1"/>
-                            <field name="service_id"/>
-                            <field name="customer_waste_group_id"/>
-                            <field name="estimated_waste_volume"/>
-                        </group>
-                        <group>
-                            <field name="start_date"/>
-                            <field name="contract_term"/>
-                            <field name="status"/>
-                            <field name="employee_id" readonly="1"/>
-                        </group>
-                    </group>
+                    <notebook>
+                        <!-- Tab Thông tin Hợp đồng -->
+                        <page string="Thông tin hợp đồng">
+                            <group>
+                                <group>
+                                    <field name="contract_number"/>
+                                    <field name="customer_id"/>
+                                    <field name="collection_unit_id" readonly="1"/>
+                                    <field name="service_id"/>
+                                    <field name="customer_waste_group_id"/>
+                                    <field name="estimated_waste_volume"/>
+                                </group>
+                                <group>
+                                    <field name="start_date" readonly="1"/>
+                                    <field name="contract_term"/>
+                                    <field name="end_date" readonly="1"/>
+                                    <field name="status"/>
+                                    <field name="employee_id" readonly="1"/>
+                                    <field name="months_paid_count" readonly="1"/>
+                                    <field name="orders_count" readonly="1"/>
+                                    <field name="progress_percent" widget="progressbar" readonly="1"/>
+                                    <field name="remaining_debt" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+
+                        <!-- Tab Danh sách Hóa đơn -->
+                        <page string="Hóa đơn thanh toán">
+                            <field name="orders">
+                                <list>
+                                    <field name="months_selected" widget="many2many_tags"/>
+                                    <field name="total_amount" readonly="1"/>
+                                    <field name="create_date"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="months_selected" widget="many2many_tags"/>
+                                        <field name="total_amount" readonly="1"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
+
             </form>
         </field>
     </record>
@@ -43,6 +71,7 @@
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="monthly_amount"/>
+                <field name="remaining_debt"/>
             </list>
         </field>
     </record>
