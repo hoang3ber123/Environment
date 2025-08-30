@@ -21,11 +21,6 @@ class Customer(models.Model):
         selection=[
             ('CN', 'Cá nhân'),
             ('TC', 'Tổ chức'),
-            ('HGD', 'Hộ gia đình'),
-            ('N1', 'Nhóm 1'),
-            ('N2', 'Nhóm 2'),
-            ('N3', 'Nhóm 3'),
-            ('N4', 'Nhóm 4'),
         ],
         string="Loại khách hàng",
         required=True,

@@ -1,8 +1,6 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
-import logging
-_logger = logging.getLogger(__name__)
 
 class Contract(models.Model):
     _name = "env.contract"
