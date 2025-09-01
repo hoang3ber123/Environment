@@ -7,53 +7,51 @@ from datetime import datetime
 VNPAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
 VNPAY_TMNCODE = "LZPLRB1E"
 VNPAY_HASH_SECRET = "APBHTE4INVHF4PE8N0DBU6G09NHAMWQU"
-VNPAY_RETURN_URL = "http://localhost:8080/vnpay/payment_return"
-class CustomerController(http.Controller):
-    @http.route('/order/test_fixed', type='http', auth='public', methods=['GET'], csrf=False)
-    def test_fixed_payment(self, **kw):
-        """
-        API test thanh toán VNPAY với dữ liệu cứng:
-        - contract_id = 1
-        - tổng tiền = 100.000 VND
-        """
-        try:
-            contract_id = 1
-            total_amount = 100000  # 100k VND
-            txn_ref = f"TEST_{int(datetime.now().timestamp())}"
+SECRET_KEY = b"your_secret_key"
+import hmac
+import hashlib
+import base64
+import json
+import time
 
-            # build url callback
-            current_domain = request.httprequest.host_url.rstrip("/")
-            return_url = f"{current_domain}/orders/payment_return?status=success&contract_id={contract_id}"
+def encode_payment_data(contract_id: int, month_ids: list[int]) -> str:
+    """
+    Tạo token thanh toán từ contract_id + month_ids, kèm expiry 10 phút.
+    """
+    data = {
+        "cid": contract_id,
+        "mids": month_ids,
+        "exp": int(time.time()) + 600,  # hết hạn sau 10 phút
+    }
+    # Chuyển sang json bytes
+    payload = json.dumps(data, separators=(",", ":")).encode()
+    # Tạo chữ ký HMAC
+    signature = hmac.new(SECRET_KEY, payload, hashlib.sha256).digest()
+    # Ghép payload + signature, encode base64 để bỏ vào URL
+    token = base64.urlsafe_b64encode(payload + b"." + signature).decode()
+    return token
 
-            # tạo object VNPAY
-            vnp = vnpay()
-            # tất cả giá trị phải là chuỗi, không để int hay None
-            vnp.requestData = {
-                "vnp_Version": "2.1.0",
-                "vnp_Command": "pay",
-                "vnp_TmnCode": str(VNPAY_TMNCODE),
-                "vnp_Amount": str(int(total_amount) * 100),
-                "vnp_CurrCode": "VND",
-                "vnp_TxnRef": str(txn_ref),
-                "vnp_OrderInfo": f"thanh toan hop dong {contract_id}",
-                "vnp_OrderType": "other",
-                "vnp_Locale": "vn",
-                "vnp_CreateDate": datetime.now().strftime("%Y%m%d%H%M%S"),
-                "vnp_ReturnUrl": return_url,
-                "vnp_IpAddr": request.httprequest.remote_addr or "127.0.0.1",
-            }
+def decode_payment_data(token: str):
+    """
+    Giải mã token thanh toán.
+    Trả về (cid, mids) hoặc (None, None) nếu không hợp lệ/hết hạn.
+    """
+    try:
+        raw = base64.urlsafe_b64decode(token.encode())
+        payload_bytes, signature = raw.rsplit(b".", 1)
+        # Kiểm tra chữ ký
+        expected_sig = hmac.new(SECRET_KEY, payload_bytes, hashlib.sha256).digest()
+        if not hmac.compare_digest(signature, expected_sig):
+            return None, None
 
-            # gọi hàm bạn có sẵn để lấy URL
-            payment_url = vnp.get_payment_url(VNPAY_URL, VNPAY_HASH_SECRET)
-            _logger.info(f"=== Payment URL test: {payment_url}")
-
-            # trả về JSON chuẩn API
-            return request.redirect(payment_url)
-
-        except Exception as e:
-            _logger.error(f"=== Lỗi khi tạo payment test: {e}", exc_info=True)
-            return request.make_json_response({"error": str(e)}, status=500)
+        data = json.loads(payload_bytes.decode())
+        if data.get("exp", 0) < time.time():
+            return None, None  # token hết hạn
+        return data.get("cid"), data.get("mids")
+    except Exception:
+        return None, None
     
+class CustomerController(http.Controller): 
     @http.route('/order', type='http', auth='public', methods=['POST'], csrf=False)
     def order_create(self, **kw):
         """
@@ -95,18 +93,17 @@ class CustomerController(http.Controller):
 
             # build url thanh toán
             current_domain = request.httprequest.host_url.rstrip("/")
-            month_ids_str = ",".join(str(m.id) for m in months)
-            VNPAY_RETURN_URL = f"{current_domain}/orders/payment_return?contract_id={contract.id}&month_ids={month_ids_str}"
+            token = encode_payment_data(contract.id, month_ids)
+            VNPAY_RETURN_URL = f"{current_domain}/orders/payment_return"
 
             vnp = vnpay()
-            txn_ref = f"{contract.id}_{int(datetime.now().timestamp())}"
             vnp.requestData = {
                 "vnp_Version": "2.1.0",
                 "vnp_Command": "pay",
                 "vnp_TmnCode": VNPAY_TMNCODE,
                 "vnp_Amount": str(int(total_amount) * 100),  # VND * 100
                 "vnp_CurrCode": "VND",
-                "vnp_TxnRef": txn_ref,
+                "vnp_TxnRef": token,
                 "vnp_OrderInfo": f"Thanh toan hop dong {contract.id} - {len(months)} thang",
                 "vnp_OrderType": "other",
                 "vnp_Locale": "vn",
@@ -125,22 +122,25 @@ class CustomerController(http.Controller):
     
     @http.route('/orders/payment_return', type='http', auth='public', methods=['GET'], csrf=False)
     def payment_return(self, **kwargs):
-        contract_id = kwargs.get("contract_id")
-        month_ids_str = kwargs.get("month_ids")
+        token = kwargs.get("vnp_TxnRef")  # lấy token trả về từ VNPAY
         response_code = kwargs.get("vnp_ResponseCode")
 
-        if not contract_id or not month_ids_str:
-            return request.redirect("/payment_result?status=fail&reason=missing_params")
+        if not token:
+            return request.redirect("/payment_result?status=fail&reason=missing_token")
+
+        # giải token
+        contract_id, month_ids = decode_payment_data(token)
+        if not contract_id or not month_ids:
+            return request.redirect("/payment_result?status=fail&reason=invalid_or_expired_token")
 
         contract = request.env["env.contract"].sudo().browse(int(contract_id))
         if not contract.exists():
             return request.redirect("/payment_result?status=fail&reason=contract_not_found")
 
-        month_ids = [int(x) for x in month_ids_str.split(",") if x]
         months = request.env["env.contract.month"].sudo().browse(month_ids)
 
         if response_code == "00":
-            # Tính total_amount ngay tại đây
+            # Tính total_amount
             total_amount = len(months) * (contract.monthly_amount or 0.0)
 
             # Tạo order
