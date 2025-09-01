@@ -13,7 +13,7 @@
                                 <th>Ngày bắt đầu</th>
                                 <th>Ngày kết thúc</th>
                                 <th>Trạng thái</th>
-                                <th>Số tháng hợp đồng</th>
+                                <th>Thời hạn</th>
                                 <th>Phí hàng tháng</th>
                                 <th>Hành động</th>
                             </tr>
@@ -52,7 +52,7 @@
 
             <!-- Modal Thanh toán -->
             <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
+              <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                   <div class="modal-header">
                     <h5 class="modal-title" id="paymentModalLabel">Thanh toán hợp đồng</h5>
@@ -60,18 +60,10 @@
                   </div>
                   <div class="modal-body">
                     <form id="paymentForm">
-                        <div class="mb-3">
-                            <label for="contractId" class="form-label">Mã hợp đồng</label>
-                            <input type="text" class="form-control" id="contractId" readonly="readonly"/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Chọn số tháng thanh toán</label>
-                            <select class="form-select" id="months">
-                                <option value="1">1 tháng</option>
-                                <option value="3">3 tháng</option>
-                                <option value="6">6 tháng</option>
-                                <option value="12">12 tháng</option>
-                            </select>
+                        <input type="hidden" id="contractId"/>
+
+                        <div id="monthsContainer">
+                            <!-- Các tháng sẽ load bằng ajax -->
                         </div>
                     </form>
                   </div>
@@ -82,27 +74,57 @@
                 </div>
               </div>
             </div>
-
-            <!-- JS để gán contract vào modal -->
-            <script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script type="text/javascript">
+            <![CDATA[
             document.addEventListener("DOMContentLoaded", function () {
               var paymentModal = document.getElementById("paymentModal");
               paymentModal.addEventListener("show.bs.modal", function (event) {
                 var button = event.relatedTarget;
                 var contractId = button.getAttribute("data-contract");
-                paymentModal.querySelector("#contractId").value = contractId;
+                document.getElementById("contractId").value = contractId;
+
+                // load months list qua ajax
+                fetch("/contract/" + contractId + "/months")
+                  .then(res => res.json())
+                  .then(data => {
+                    let container = document.getElementById("monthsContainer");
+                    container.innerHTML = "";
+                    if (data.months && data.months.length) {
+                      data.months.forEach(m => {
+                        let disabled = m.paid ? "disabled" : "";
+                        let label = m.paid ? `${m.name} ✅ Đã thanh toán` : m.name;
+                        container.innerHTML += `
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value="${m.id}" id="month_${m.id}" ${disabled}>
+                            <label class="form-check-label" for="month_${m.id}">${label}</label>
+                          </div>
+                        `;
+                      });
+                    } else {
+                      container.innerHTML = "<p>Không có tháng nào trong hợp đồng.</p>";
+                    }
+                  })
+                  .catch(err => {
+                    console.error(err);
+                  });
               });
 
               document.getElementById("confirmPayment").addEventListener("click", function () {
                 var contractId = document.getElementById("contractId").value;
-                var months = document.getElementById("months").value;
+                var selectedMonths = Array.from(document.querySelectorAll("#monthsContainer input:checked")).map(el => el.value);
+
+                if (!selectedMonths.length) {
+                  alert("Vui lòng chọn ít nhất 1 tháng để thanh toán");
+                  return;
+                }
 
                 fetch("/order", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
                     contract_id: contractId,
-                    months_paid: months
+                    months_selected: selectedMonths
                   }),
                 })
                 .then(res => res.json())
@@ -123,6 +145,7 @@
                 bootstrap.Modal.getInstance(paymentModal).hide();
               });
             });
+            ]]>
             </script>
         </t>
     </template>

@@ -63,6 +63,64 @@
                                 </form>
                             </field>
                         </page>
+                        <!-- Tab nhóm nhân viên -->
+                        <page string="Nhóm nhân viên">
+                            <field name="collection_group_ids">
+                                <list string="Nhóm nhân viên">
+                                    <field name="name"/>
+                                </list>
+                                <form string="Nhóm nhân viên">
+                                    <sheet>
+                                        <notebook>
+                                            <!-- Tab nhóm nhân viên -->
+                                            <page string="nhóm thành viên">
+                                                <group>
+                                                    <field name="name"/>
+                                                    <field name="collection_unit_id" readonly="1"/>
+                                                </group>
+                                            </page>
+                                            <!-- Tab Thành viên -->
+                                            <page string="Thành viên">
+                                                <field name="member_ids">
+                                                    <list editable="bottom">
+                                                        <field name="name"/>
+                                                        <field name="phone"/>
+                                                        <field name="email"/>
+                                                    </list>
+                                                    <form>
+                                                        <sheet>
+                                                            <group>
+                                                                <field name="name"/>
+                                                                <field name="phone"/>
+                                                                <field name="email"/>
+                                                            </group>
+                                                        </sheet>
+                                                    </form>
+                                                </field>
+                                            </page>
+
+                                            <!-- Tab Quyền hạn -->
+                                            <page string="Quyền hạn">
+                                                <field name="action_ids">
+                                                    <list editable="bottom">
+                                                        <field name="name"/>
+                                                        <field name="code"/>
+                                                    </list>
+                                                    <form>
+                                                        <sheet>
+                                                            <group>
+                                                                <field name="name"/>
+                                                                <field name="code"/>
+                                                            </group>
+                                                        </sheet>
+                                                    </form>
+                                                </field>
+                                            </page>
+                                        </notebook>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
@@ -98,5 +156,4 @@
     <!-- Menu -->
     <menuitem id="menu_collectionunit" name="Đơn vị thu gom"
               parent="menu_unit_root" action="action_collectionunit"/>
-
 </odoo>

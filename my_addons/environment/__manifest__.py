@@ -5,6 +5,7 @@
     'data': [
             'security/environment_security.xml',
             'security/ir.model.access.csv',
+            'data/env.collectionunitaction.csv',
             'data/env.location.csv',
             'data/env.collectionunit.csv',
             'data/env.customerwastegroup.csv',

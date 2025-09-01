@@ -1,6 +1,6 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
-
+from ..utils import permission
 class Customer(models.Model):
     _name = 'env.customer'
     _description = 'Khách hàng'
@@ -21,11 +21,6 @@ class Customer(models.Model):
         selection=[
             ('CN', 'Cá nhân'),
             ('TC', 'Tổ chức'),
-            ('HGD', 'Hộ gia đình'),
-            ('N1', 'Nhóm 1'),
-            ('N2', 'Nhóm 2'),
-            ('N3', 'Nhóm 3'),
-            ('N4', 'Nhóm 4'),
         ],
         string="Loại khách hàng",
         required=True,
@@ -176,6 +171,10 @@ class Customer(models.Model):
     @api.model
     def create(self, vals):
         rec = super().create(vals)
+        # check quyền
+        collection_unit_id = vals.get("collection_unit_id")
+        permission.check_employee_permission(self.env, collection_unit_id, "add_customer")
+        # generate location path
         location_path = ''
         if rec.location_id:
             location_path = rec.location_id.sudo().read(['full_path'])[0]['full_path']
@@ -193,6 +192,9 @@ class Customer(models.Model):
     def write(self, vals):
         res = super().write(vals)
         for rec in self:
+            # check quyền
+            collection_unit_id = vals.get("collection_unit_id", rec.collection_unit_id.id)
+            permission.check_employee_permission(self.env, collection_unit_id, "edit_customer")
             location_path = ''
             if rec.location_id:
                 location_path = rec.location_id.sudo().read(['full_path'])[0]['full_path']
@@ -205,3 +207,4 @@ class Customer(models.Model):
                 UPDATE env_customer SET full_path = %s WHERE id = %s
             """, (full_path, rec.id))
         return res  
+    
