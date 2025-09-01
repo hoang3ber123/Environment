@@ -70,6 +70,12 @@ class CollectionUnit(models.Model):
         string='Bảng giá liên kết với đơn vị'
     )
     
+    collection_group_ids = fields.One2many(
+        'env.collectionunitgroup',
+        'collection_unit_id',
+        string="Nhóm nhân viên"
+    )
+
     _sql_constraints = [
         ('name_uniq', 'unique(name)', 'Tên đơn vị thu gom phải là duy nhất.'),
         ('code_uniq', 'unique(code)', 'Mã đơn vị thu gom phải là duy nhất.')
@@ -130,3 +136,4 @@ class CollectionUnit(models.Model):
                     "Không thể cập nhật phạm vi của '%s' vì có khách hàng nằm ngoài khu vực mới: %s"
                     % (unit.name, ", ".join(invalid_customers.mapped('name')))
                 )
+            

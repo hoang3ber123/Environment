@@ -1,6 +1,7 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
+from ..utils import permission
 
 class Contract(models.Model):
     _name = "env.contract"
@@ -278,22 +279,25 @@ class Contract(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
-            # Đảm bảo start_date
-            if 'start_date' not in vals or not vals['start_date']:
-                vals['start_date'] = fields.Date.today()
-
-            # Đảm bảo contract_term
-            if 'contract_term' not in vals or not vals['contract_term']:
-                vals['contract_term'] = '12'
-
-            # Tính end_date trước khi tạo record
-            vals['end_date'] = self._calc_end_date(vals['start_date'], vals['contract_term'])
-
             # Cập nhật collection_unit_id dựa trên customer_id
             if 'customer_id' in vals and not vals.get('collection_unit_id'):
                 customer = self.env['env.customer'].browse(vals['customer_id'])
                 if customer.collection_unit_id:
+                    collection_unit_id = customer.collection_unit_id.id
                     vals['collection_unit_id'] = customer.collection_unit_id.id
+            
+            # check quyền
+            if collection_unit_id:
+                permission.check_employee_permission(self.env, collection_unit_id, "add_contract")
+            
+            # Đảm bảo start_date
+            vals.setdefault("start_date", fields.Date.today())
+
+            # Đảm bảo contract_term
+            vals.setdefault("contract_term", "12")
+
+            # Tính end_date trước khi tạo record
+            vals['end_date'] = self._calc_end_date(vals['start_date'], vals['contract_term'])
 
         # Tạo records
         records = super().create(vals_list)
@@ -311,6 +315,11 @@ class Contract(models.Model):
         }
 
         for rec in self:
+            # check quyền
+            collection_unit_id = vals.get("collection_unit_id", rec.collection_unit_id.id)
+            permission.check_employee_permission(self.env, collection_unit_id, "edit_contract")
+            
+            # Check tháng đã trả chưa
             if rec.months and any(m.paid for m in rec.months):
                 # Nếu có tháng đã thanh toán → chặn update các field nhạy cảm
                 for field in blocked_fields:
@@ -320,18 +329,13 @@ class Contract(models.Model):
                         )
 
             # Set mặc định nếu chưa có start_date
-            if "start_date" not in vals and not rec.start_date:
-                vals["start_date"] = fields.Date.today()
-
-            # Set mặc định nếu chưa có contract_term
-            if "contract_term" not in vals and not rec.contract_term:
-                vals["contract_term"] = 12
+            start_date = vals.get("start_date", rec.start_date or fields.Date.today())
+            contract_term = vals.get("contract_term", rec.contract_term or 12)
 
             # Cập nhật end_date khi có thay đổi start_date hoặc contract_term
             start_date = vals.get("start_date", rec.start_date)
             contract_term = vals.get("contract_term", rec.contract_term)
-            if start_date and contract_term:
-                vals["end_date"] = self._calc_end_date(start_date, contract_term)
+            vals["end_date"] = self._calc_end_date(start_date, contract_term)
 
             # Nếu đổi customer_id thì gán collection_unit_id tự động
             if "customer_id" in vals and not vals.get("collection_unit_id"):

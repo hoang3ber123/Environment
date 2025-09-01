@@ -1,9 +1,6 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-import logging
-
-_logger = logging.getLogger(__name__)
-
+from ..utils import permission
 
 class ContractOrder(models.Model):
     _name = "env.contract.order"
@@ -49,12 +46,27 @@ class ContractOrder(models.Model):
 
     @api.model
     def create(self, vals):
+        # check quyền
+        contract = self.env["env.contract"].browse(vals.get("contract_id"))
+        if contract and contract.collection_unit_id:
+            permission.check_employee_permission(
+                self.env, contract.collection_unit_id.id, "create_order"
+            )
         order = super().create(vals)
         # Đánh dấu các tháng đã thanh toán
         for month in order.months_selected:
             month.paid = True
             month.order_id = order.id
         return order
+    
+    def write(self, vals):
+        for rec in self:
+            contract = rec.contract_id
+            if contract and contract.collection_unit_id:
+                permission.check_employee_permission(
+                    self.env, contract.collection_unit_id.id, "edit_contract"
+                )
+        return super().write(vals)
 
 class ContractMonth(models.Model):
     _name = 'env.contract.month'

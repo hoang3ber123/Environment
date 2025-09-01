@@ -12,4 +12,5 @@ from . import unit_service
 from . import unit_service_price
 from . import contract
 from . import contract_order
+from . import collection_unit_group
 
