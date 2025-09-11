@@ -60,12 +60,25 @@ class ContractOrder(models.Model):
         return order
     
     def write(self, vals):
+        sensitive_fields = {"contract_id", "months_selected", "total_amount"}
         for rec in self:
-            contract = rec.contract_id
-            if contract and contract.collection_unit_id:
-                permission.check_employee_permission(
-                    self.env, contract.collection_unit_id.id, "edit_contract"
-                )
+            if any(f in vals for f in sensitive_fields):
+                if rec.contract_id and rec.contract_id.collection_unit_id:
+                    permission.check_employee_permission(
+                        self.env, rec.contract_id.collection_unit_id.id, "edit_order"
+                    )
+
+            # Không cho đổi contract_id sau khi tạo
+            if "contract_id" in vals and vals["contract_id"] != rec.contract_id.id:
+                raise ValidationError("Không thể thay đổi hợp đồng của đơn hàng.")
+
+            # Không cho bỏ/đổi tháng đã đánh dấu paid
+            if "months_selected" in vals:
+                new_months = self.env["env.contract.month"].browse(vals["months_selected"][0][2])
+                already_paid = rec.months_selected.filtered(lambda m: m.paid)
+                if any(m not in new_months for m in already_paid):
+                    raise ValidationError("Không thể bỏ các tháng đã thanh toán khỏi đơn hàng.")
+
         return super().write(vals)
 
 class ContractMonth(models.Model):

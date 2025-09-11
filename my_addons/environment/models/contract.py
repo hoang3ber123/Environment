@@ -307,7 +307,19 @@ class Contract(models.Model):
 
         return records
 
+    def _has_sensitive_changes(self, vals, sensitive_fields):
+        """Helper: kiểm tra xem có thay đổi field nhạy cảm không"""
+        for field in sensitive_fields:
+            if field in vals:
+                return True
+        return False
+
     def write(self, vals):
+        sensitive_fields = {
+            "customer_id", "collection_unit_id", "service_id",
+            "customer_waste_group_id", "contract_term","contract_number",
+            "start_date", "end_date","status",
+        }
         blocked_fields = {
             "customer_id", "collection_unit_id", "service_id",
             "customer_waste_group_id", "contract_term",
@@ -316,8 +328,10 @@ class Contract(models.Model):
 
         for rec in self:
             # check quyền
-            collection_unit_id = vals.get("collection_unit_id", rec.collection_unit_id.id)
-            permission.check_employee_permission(self.env, collection_unit_id, "edit_contract")
+            # nếu có thay đổi nhạy cảm thì mới check quyền
+            if self._has_sensitive_changes(vals, sensitive_fields):
+                collection_unit_id = vals.get("collection_unit_id", rec.collection_unit_id.id)
+                permission.check_employee_permission(self.env, collection_unit_id, "edit_contract")
             
             # Check tháng đã trả chưa
             if rec.months and any(m.paid for m in rec.months):

@@ -190,21 +190,28 @@ class Customer(models.Model):
         return rec
 
     def write(self, vals):
-        res = super().write(vals)
+        # Các field nhạy cảm → cần quyền edit_customer
+        sensitive_fields = {
+            "name", "customer_type", "phone", "email", "cccd",
+            "street", "house_number", "collection_unit_id", "description","house_type","waste_classification"
+        }
+
         for rec in self:
-            # check quyền
-            collection_unit_id = vals.get("collection_unit_id", rec.collection_unit_id.id)
-            permission.check_employee_permission(self.env, collection_unit_id, "edit_customer")
-            location_path = ''
-            if rec.location_id:
-                location_path = rec.location_id.sudo().read(['full_path'])[0]['full_path']
+            if any(f in vals for f in sensitive_fields):
+                collection_unit_id = vals.get("collection_unit_id", rec.collection_unit_id.id)
+                permission.check_employee_permission(self.env, collection_unit_id, "edit_customer")
+
+            # Luôn update lại full_path
+            location_path = rec._get_location_full_path()
             full_path = " > ".join(filter(None, [
                 location_path,
-                rec.street or '',
-                rec.house_number or '',
+                vals.get("street", rec.street) or '',
+                vals.get("house_number", rec.house_number) or '',
             ]))
             self.env.cr.execute("""
                 UPDATE env_customer SET full_path = %s WHERE id = %s
             """, (full_path, rec.id))
-        return res  
+
+        return super().write(vals)
+
     
