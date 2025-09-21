@@ -1,7 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_env_location_manager,env.location manager,model_env_location,group_env_manager,1,1,1,1
 access_env_servicegroup_manager,env.servicegroup manager,model_env_servicegroup,group_env_manager,1,1,1,1
 access_env_service_manager,env.service manager,model_env_service,group_env_manager,1,1,1,1
-access_env_location_manager,env.location manager,model_env_location,group_env_manager,1,1,1,1
 access_env_collectionunit_manager,env.collectionunit manager,model_env_collectionunit,group_env_manager,1,1,1,1
 access_env_customer_manager,env.customer manager,model_env_customer,group_env_manager,1,1,1,1
 access_env_customerimportwizard_manager,env.customerimportwizard manager,model_env_customerimportwizard,group_env_manager,1,0,1,0
