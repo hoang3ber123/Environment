@@ -8,7 +8,6 @@ class Location(models.Model):
     name = fields.Char(
         required=True,
         string="Tên địa phương",
-        readonly=True,
         help="Tên địa phương (VD: Phường 1, Quận 5, TP. Hồ Chí Minh). Được nhập từ dữ liệu chuẩn, không cho sửa."
     )
 
@@ -27,12 +26,10 @@ class Location(models.Model):
     code = fields.Char(
         required=True,
         string="Mã địa phương",
-        readonly=True,
         help="Mã định danh của địa phương theo hệ thống. Được nhập từ dữ liệu chuẩn, không cho sửa."
     )
 
     full_path = fields.Char(
-        required=True,
         string="Đường dẫn đầy đủ",
         readonly=True,
         help="Tên đầy đủ của địa phương theo thứ tự hành chính (VD: TP. Hồ Chí Minh > Quận 5 > Phường 1)."
@@ -41,7 +38,6 @@ class Location(models.Model):
     parent_id = fields.Many2one(
         'env.location',
         string='Địa phương cấp trên',
-        readonly=True,
         help="Địa phương cha trong cấu trúc hành chính (VD: Quận trực thuộc Thành phố, Phường trực thuộc Quận...)."
     )
 

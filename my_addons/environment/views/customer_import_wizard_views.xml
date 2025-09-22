@@ -6,6 +6,10 @@
         <field name="arch" type="xml">
             <form string="Import Customer from Excel" enctype="multipart/form-data">
                 <group>
+                    <field name="collection_unit_id"/>
+                    <field name="location_id"/>
+                </group>
+                <group>
                     <field name="file" filename="filename"/>
                     <field name="filename" readonly="1"/>
                 </group>
@@ -26,5 +30,8 @@
     </record>
 
     <!-- Menu con trong Khách hàng -->
-        <menuitem id="menu_customerimportwizard_import_excel" name="Thêm danh sách khách hàng" parent="menu_customer_root" action="action_customerimportwizard"/>
+    <menuitem id="menu_customerimportwizard_import_excel"
+              name="Thêm danh sách khách hàng"
+              parent="menu_customer_root"
+              action="action_customerimportwizard"/>
 </odoo>

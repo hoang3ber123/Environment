@@ -14,45 +14,45 @@ class CustomerImportWizard(models.TransientModel):
     file = fields.Binary(string="File Excel", required=True)
     filename = fields.Char(string="Tên file")
 
+    # Thêm field chọn sẵn
+    collection_unit_id = fields.Many2one(
+        'env.collectionunit',
+        string="Đơn vị thu gom",
+        required=True,
+        help="Chọn đơn vị thu gom áp dụng cho toàn bộ khách hàng trong file."
+    )
+    location_id = fields.Many2one(
+        'env.location',
+        string="Địa phương",
+        required=True,
+        help="Chọn địa phương áp dụng cho toàn bộ khách hàng trong file."
+    )
+
     def action_import_file(self):
-        """Đọc CSV và in ra console"""
         if not self.file:
             raise UserError("Vui lòng tải file CSV.")
+
+        # Check location phải là ward
+        if self.location_id.type != 'ward':
+            raise UserError("Vị trí được chọn phải có loại là 'ward' (Phường/Xã).")
+
+        # Check collection_unit có quản lý location không
+        customer_path = self.location_id.full_path or ''
+        managed_paths = self.collection_unit_id.location_ids.mapped('full_path')
+        is_valid = any(customer_path.startswith(mp) for mp in managed_paths)
+        if not is_valid:
+            raise UserError(
+                "Đơn vị thu gom '%s' không phụ trách khu vực '%s'."
+                % (self.collection_unit_id.name, self.location_id.full_path)
+            )
 
         # Giải mã file từ binary base64 -> text
         file_content = base64.b64decode(self.file)
         csv_text = file_content.decode('utf-8')
 
-        # Đọc CSV thành list dict
         csv_reader = csv.DictReader(StringIO(csv_text))
         data = [row for row in csv_reader]
 
-        # Tạo set chứa full_path location và collection_unit_id
-        full_path_set = {row['location_id'] for row in data if row.get('location_id')}
-        collection_unit_set = {row['collection_unit_id'] for row in data if row.get('collection_unit_id')}
-        
-        # ORM query env.location
-        locations = self.env['env.location'].search([
-            ('full_path', 'in', list(full_path_set))
-        ])
-        location_map = {loc.full_path: loc.id for loc in locations}
-
-        # ORM query env.collectionunit
-        collection_units = self.env['env.collectionunit'].search([
-            ('code', 'in', list(collection_unit_set))
-        ])
-        collection_unit_map = {cu.code: cu.id for cu in collection_units}
-
-        # Thay thế giá trị trong mảng data
-        for row in data:
-            loc_key = row.get('location_id')
-            row['location_id'] = location_map.get(loc_key) if loc_key and loc_key in location_map else None
-
-            cu_key = row.get('collection_unit_id')
-            row['collection_unit_id'] = collection_unit_map.get(cu_key) if cu_key and cu_key in collection_unit_map else None
-       
-
-        # Tạo list vals để bulk create
         customer_vals_list = []
         for row in data:
             vals = {
@@ -62,25 +62,21 @@ class CustomerImportWizard(models.TransientModel):
                 'phone': row.get('phone'),
                 'email': row.get('email'),
                 'cccd': row.get('cccd'),
-                'waste_classification': bool(row.get('waste_classification')),
+                'waste_classification': str(row.get('waste_classification')).strip().lower() in ['true', '1', 'yes'],
                 'house_type': row.get('house_type'),
                 'street': row.get('street'),
                 'house_number': row.get('house_number'),
                 'description': row.get('description'),
-                'location_id': row.get('location_id'),
-                'collection_unit_id': row.get('collection_unit_id'),
+                'location_id': self.location_id.id,
+                'collection_unit_id': self.collection_unit_id.id,
             }
-        
-            # Nếu bắt buộc field nào mà CSV không có → bỏ qua record
-            if vals['name'] and vals['customer_type'] and vals['house_type'] and vals['street'] and vals['house_number'] and vals['location_id']:
+            if vals['name'] and vals['customer_type'] and vals['house_type'] and vals['street'] and vals['house_number']:
                 customer_vals_list.append(vals)
 
-        # Bulk create
         if customer_vals_list:
             self.env['env.customer'].create(customer_vals_list)
 
         _logger.info("===== IMPORTED CUSTOMERS =====")
         _logger.info(customer_vals_list)
-
 
         return {'type': 'ir.actions.act_window_close'}

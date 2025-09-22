@@ -6,7 +6,10 @@
     
     <!-- Submenus under Manager -->
     <menuitem id="menu_service_root" name="Quản lý dịch vụ" parent="menu_manager_root"/>
-    <menuitem id="menu_location_root" name="Quản lý khu vực" parent="menu_manager_root"/>
+    <menuitem id="menu_location_root"
+          name="Quản lý khu vực"
+          parent="menu_manager_root"
+          groups="environment.group_env_manager"/>
     <menuitem id="menu_customer_root"
               name="Quản lý khách hàng"
               parent="menu_manager_root"
